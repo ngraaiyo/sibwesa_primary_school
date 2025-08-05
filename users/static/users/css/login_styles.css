@@ -1,0 +1,140 @@
+/* sibwesa_primary_school/static/users/css/login_styles.css */
+
+/*
+   Styles specific to the login page layout.
+   This file should be linked AFTER forms.css in login.html
+   to allow for overriding or adding new rules.
+*/
+body {
+    min-height: 100vh;
+    width: 100vw;
+    background: url('/static/users/img/school.jpg') no-repeat center center fixed;
+    background-size: cover;
+    position: relative;
+    overflow: hidden; /* Ensures no body scroll */
+}
+
+.main-content-wrapper {
+    display: flex;
+    justify-content: center; /* Horizontally center the card */
+    align-items: center;  
+    min-height: calc(100vh - 120px); 
+    padding: 20px; /* Overall padding around the content within the wrapper */
+    box-sizing: border-box; /* Ensures padding doesn't add to element's total width/height */
+    flex-direction: column; /* Stack content vertically if multiple items */
+}
+
+.transparent-card {
+    /* Adjust these values to increase the card's size */
+    width: 90%;          /* Take 90% of available width */
+    max-width: 450px;    /* Limit maximum width on larger screens (adjust as needed) */
+    padding: 40px;       /* Increase internal padding for more space */
+    box-sizing: border-box; /* Include padding in the width calculation */
+    
+    /* Add space between the card and the bottom of the content area/footer */
+    margin-bottom: 50px; /* Space below the card (adjust as needed) */
+    margin-top: 30px; /* Add some margin above the card too, if it feels too high */
+
+    /* Basic card styling (ensure these are either here or in forms.css) */
+    background-color: rgba(255, 255, 255, 0.8); /* Example transparent white */
+    border: 1px solid rgba(0, 0, 0, 0.1); /* Light border */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Slightly stronger shadow */
+}
+
+/* Ensure the card header and body have appropriate spacing */
+.transparent-card .card-header {
+    text-align: center;
+    margin-bottom: 15px; /* Space below the header text */
+    color: rgb(216, 216, 222);
+    background-color: blue;
+    font-size: 0.2px;
+    border-radius: 12px;
+}
+
+.transparent-card .card-body {
+    padding: 0; /* Remove default body padding if you've added it to the main card */
+}
+
+/* Adjust button styles if needed */
+.transparent-card .btn {
+    padding: 12px 20px;
+    font-size: 1.1rem;
+}
+
+/* Adjust links below the form */
+.transparent-card p.mt-3,
+.transparent-card p.mt-1 {
+    text-align: center;
+}
+
+footer#main-site-footer {
+    position: fixed; /* CHANGE THIS */
+    bottom: 0;       /* ADD THIS */
+    left: 0;         /* ADD THIS */
+    width: 100%;     /* ADD THIS */
+    z-index: 99;     /* Ensure it's above other elements */
+    padding: 10px;
+    background-color: rgba(210, 200, 200, 0.8);
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    color: #333; /* Or whatever color suits your footer */
+}
+
+.card.transparent-card {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.18); /* Lighter border for transparency */
+    border-radius: 1.2rem;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37); /* More prominent shadow for better depth */
+    backdrop-filter: blur(14px); /* THIS IS WHERE THE BLUR HAPPENS FOR THE CARD ONLY */
+    -webkit-backdrop-filter: blur(8px);
+    padding: 2.5rem 2rem;
+
+    transform: scale(0.98); /* Slightly smaller by default */
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s;
+    box-sizing: border-box;
+}
+
+.input-group-field {
+    position: relative; /* This makes it the positioning context for the icon */
+    display: block;     /* Ensures it takes full width */
+    margin-bottom: 15px; /* Space between different input groups */
+}
+
+.input-group-field .form-control {
+    /* Add padding to the left to make space for the icon */
+    padding-left: 40px; /* Adjust this value if the icon is too close/far from the text */
+    /* Ensure the input field has a consistent height. Bootstrap's form-control usually handles this. */
+    height: calc(2.25rem + 2px); /* This is a common Bootstrap 5 input height */
+}
+
+.input-group-field .icon-in-field {
+    position: absolute;   /* Position the icon absolutely within its parent .input-group-field */
+    left: 12px;           /* Distance from the left edge of the input field */
+    top: 50%;             /* Vertically center the icon */
+    transform: translateY(-50%); /* Fine-tune for perfect vertical centering */
+    color: #888;          /* Color of the icon */
+    font-size: 1.1rem;    /* Size of the icon */
+    pointer-events: none; /* Prevents the icon from interfering with input clicks */
+    z-index: 2;           /* Ensures the icon is above the input field content */
+}
+
+.btn.btn-primary.w-100 {
+    display: flex; /* Use flexbox to align icon and text */
+    justify-content: flex-start; /* Center horizontally */
+    align-items: center; /* Vertically center */
+    gap: 10px; /* Space between the icon and the word "Login" */
+    padding: 12px 20px; 
+    background-color: #007bff; /* Bootstrap primary color */
+    border-radius: 15px; /* Rounded corners */
+    color: #fff;
+}
+
+.button-login-icon {
+    width: 40px; /* Adjust the size of the icon inside the button */
+    height: auto; /* Maintain aspect ratio */
+}
+.btn.btn-primary.w-100:hover {
+    background-color: #0056b3; /* A slightly darker blue on hover */
+    cursor: pointer;
+}

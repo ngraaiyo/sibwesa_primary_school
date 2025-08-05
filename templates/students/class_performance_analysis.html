@@ -1,0 +1,167 @@
+{# students/templates/students/class_performance_analysis.html #}
+
+{% extends 'base.html' %}
+
+{% block title %}Class Performance Analysis - {{ class_obj.name }} - Sibwesa Primary School{% endblock %}
+
+{% block content %}
+<div class="container my-5 p-4 border rounded shadow bg-white">
+    <h2 class="text-center text-primary mb-2">📊 Class Performance Analysis</h2>
+    <p class="text-center mb-1">
+    <strong><i class="fas fa-file-alt me-1"></i>Examination:</strong>
+    {{ examination.name }} ({{ examination.get_term_display }} - {{ examination.academic_year }})
+    </p>
+    <p class="text-center mb-4">
+        <strong><i class="fas fa-school me-1"></i>Class:</strong>
+        {{ class_obj.name }} ({{ class_obj.year }})
+    </p>
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+               <div class="card-header bg-primary text-white">
+                <i class="fas fa-chart-bar me-1"></i> Overall Grade Distribution
+            </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for grade, count in overall_grade_distribution.items %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <strong>Grade {{ grade }}</strong>
+                            <span class="badge bg-secondary rounded-pill">{{ count }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+               <div class="card-header bg-success text-white">
+                    <i class="fas fa-balance-scale me-1"></i> Pass/Fail Summary
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <i class="fas fa-check-circle text-success me-2"></i> Pass (A-C)
+                            <span class="badge bg-success rounded-pill">{{ overall_pass_count }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <i class="fas fa-times-circle text-danger me-2"></i> Fail (D-F)
+                            <span class="badge bg-danger rounded-pill">{{ overall_fail_count }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            📈 <strong>Pass Rate</strong>
+                            <span class="badge bg-info rounded-pill">
+                                {% if total_students_in_class > 0 %}
+                                    {{ overall_pass_rate|floatformat:2 }}%
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            📉 <strong>Fail Rate</strong>
+                            <span class="badge bg-warning text-dark rounded-pill">{{ overall_fail_rate|floatformat:2 }}%</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-4">
+
+    <h4 class="text-secondary fw-bold mb-3">📚 Subject-wise Performance</h4>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-hover text-center align-middle shadow-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th class="text-start">Subject</th>
+                    <th>Students</th>
+                    <th>A</th><th>B</th><th>C</th>
+                    <th>D</th><th>E</th><th>F</th>
+                    <th class="bg-success text-white">Pass</th>
+                    <th class="bg-danger text-white">Fail</th>
+                    <th class="bg-primary text-white">Pass %</th>
+                    <th class="bg-danger text-white">Fail %</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for subject in subject_analysis %}
+                <tr>
+                    <td class="text-start fw-semibold">{{ subject.name }} ({{ subject.code }})</td>
+                    <td>{{ subject.total_scored }}</td>
+                    <td>{{ subject.grades.A }}</td>
+                    <td>{{ subject.grades.B }}</td>
+                    <td>{{ subject.grades.C }}</td>
+                    <td>{{ subject.grades.D }}</td>
+                    <td>{{ subject.grades.E }}</td>
+                    <td>{{ subject.grades.F }}</td>
+                    <td class="bg-success text-white">{{ subject.pass_count }}</td>
+                    <td class="bg-danger text-white">{{ subject.fail_count }}</td>
+                    <td class="bg-primary text-white"></tdclass> {{ subject.pass_percentage|floatformat:2 }}%</td>
+                    <td class="bg-danger text-white">{{ subject.fail_percentage|floatformat:2 }}%</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="12">No subject performance data available.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <hr class="my-4">
+
+    <h4 class="text-secondary fw-bold mb-3">🏅 Top 10 Students</h4>
+    {% if top_students %}
+    <ul class="list-group mb-4 shadow-sm">
+        {% for student_result in top_students %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span><strong>{{ student_result.position }}.</strong> {{ student_result.student.get_full_name }}</span>
+            <span class="badge bg-primary rounded-pill">Avg: {{ student_result.average_score }} | Grade: {{ student_result.overall_grade }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="alert alert-info">No top students to display.</div>
+    {% endif %}
+
+    <div class="d-flex justify-content-end mt-4 gap-2">
+        <a href="{% url 'performance_selection' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+        <button onclick="window.print()" class="btn btn-primary d-print-none">
+            <i class="fas fa-print"></i> Print
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    h2, h4 { font-weight: 600; }
+
+    /* Table print tweaks */
+    @media print {
+        body > *:not(.container) { display: none !important; }
+        .navbar, footer, .d-print-none { display: none !important; }
+        .container {
+            width: 100% !important;
+            padding: 0.5rem !important;
+        }
+        h2, h4, p {
+            text-align: center;
+            margin-bottom: 0.5rem !important;
+        }
+        .card, table { page-break-inside: avoid; }
+        th, td {
+            font-size: 0.75rem !important;
+            padding: 4px !important;
+            border: 1px solid #ccc !important;
+        }
+        .badge {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+    }
+</style>
+{% endblock %}

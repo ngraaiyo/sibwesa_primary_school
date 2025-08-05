@@ -1,0 +1,9 @@
+{% extends 'admin/index.html' %}
+{% load i18n static %}
+
+{% block content %}
+    <div class="main-content">
+        <p><a href="{% url 'upload_students_excel' %}" class="button">Upload Students from Excel</a></p>
+        {{ block.super }} {# This includes the original admin content #}
+    </div>
+{% endblock %}

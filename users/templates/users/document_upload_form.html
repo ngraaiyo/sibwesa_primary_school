@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if form.instance.pk %}Edit Document{% else %}Upload Document{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">{% if form.instance.pk %}Edit Document{% else %}Upload New Document{% endif %}</h1>
+    <form method="post" enctype="multipart/form-data"> {# IMPORTANT: enctype for file uploads #}
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Save Document</button>
+        <a href="{% url 'document_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

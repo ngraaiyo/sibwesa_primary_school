@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Sibwesa Primary School{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold text-primary">{{ title }}</h1> {# Main page title, centered #}
+        </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6"> {# Adjusted column size for a more compact form #}
+            <div class="card shadow-lg border-0"> {# Added shadow and removed default border #}
+                <div class="card-header bg-primary text-white text-center py-3"> {# Blue header, centered text #}
+                    <h5 class="mb-0"><i class="bi bi-gear-fill me-2"></i>Choose Form Parameters</h5> {# Example header for the card #}
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data"> {# Add enctype for forms with file uploads #}
+                        {% csrf_token %}
+
+                        {% for field in form %}
+                            <div class="mb-3">
+                                {{ field.label_tag }} {# Renders <label for="id_field_name">Field Name:</label> #}
+                                {{ field }} {# Renders the input/select/textarea element #}
+                                {% if field.help_text %}
+                                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                                {% endif %}
+                                {% for error in field.errors %}
+                                    <div class="alert alert-danger mt-1 p-2">{{ error }}</div> {# Smaller padding for errors #}
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger" role="alert">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="d-grid gap-2 mt-4"> {# Buttons take full width and stack if needed #}
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-save me-2"></i> Save {# Added save icon #}
+                            </button>
+                            {# Dynamic cancel link based on context #}
+                            {% if cancel_url %}
+                                <a href="{{ cancel_url }}" class="btn btn-outline-secondary btn-lg">
+                                    <i class="bi bi-x-circle me-2"></i> Cancel {# Added cancel icon #}
+                                </a>
+                            {% else %}
+                                {# Fallback for generic cancel if cancel_url is not provided #}
+                                <a href="javascript:history.back()" class="btn btn-outline-secondary btn-lg">
+                                    <i class="bi bi-x-circle me-2"></i> Cancel {# Added cancel icon #}
+                                </a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

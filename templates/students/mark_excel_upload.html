@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Marks - Sibwesa Primary School{% endblock %}
+
+{% block content %}
+<div class="container py-4"> {# Add a container for consistent spacing #}
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold text-primary">Upload Marks via Excel</h1> {# Stronger heading #}
+        <p class="lead text-muted">Efficiently upload student marks using a pre-formatted Excel spreadsheet.</p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+        
+    {% endif %}
+
+    {# Reduced height for "Selected Examination for Upload" card #}
+    <div class="card mb-4 shadow-sm border-0 rounded-3"> {# Smaller shadow, rounded corners #}
+        <div class="card-header bg-secondary text-white py-2 rounded-top-3"> {# Gradient, less padding, smaller rounded corners #}
+            <h5 class="mb-0 fs-6"><i class="fas fa-search me-2"></i>Selected Examination for Upload</h5> {# Smaller heading, icon #}
+        </div>
+        <div class="card-body py-2"> {# Reduced padding #}
+            {% if examination %}
+                <p class="mb-0 small text-dark">
+                    <strong>Examination:</strong> {{ examination.name }} ({{ examination.get_term_display }} - {{ examination.academic_year }})
+                </p>
+            {% else %}
+                <p class="text-danger mb-0 small"><i class="fas fa-exclamation-triangle me-1"></i> No examination selected. Please go back and select an examination first.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9"> {# Consistent column sizing #}
+            <div class="card shadow-lg border-0 rounded-4"> {# Large shadow, no border, rounded corners #}
+                <div class="card-header bg-primary text-white text-center py-3 rounded-top-4"> {# Gradient, padding, rounded corners #}
+                    <h5 class="mb-0 fs-5"><i class="fas fa-file-upload me-2"></i>Upload Excel File</h5> {# Icon #}
+                </div>
+                <div class="card-body p-4"> {# Increased padding #}
+                    <form method="post" enctype="multipart/form-data"> {# IMPORTANT: enctype for file uploads #}
+                        {% csrf_token %}
+
+                        {# NEW HIDDEN INPUT FIELD FOR EXAM_ID #}
+                        {% if examination %}
+                            <input type="hidden" name="exam_id" value="{{ examination.id }}">
+                        {% endif %}
+                        {# END NEW HIDDEN INPUT FIELD #}
+
+                        {% comment %}
+                        Using django-widget-tweaks for better form field styling.
+                        If you don't have it, remove `{% load widget_tweaks %}` and `|add_class` filters.
+                        You'll need to manually add `class="form-control"` to your form fields in forms.py
+                        or use JavaScript to add them.
+                        {% endcomment %}
+                        {% load widget_tweaks %}
+
+                        {% for field in form %}
+                            <div class="mb-4"> {# Increased margin-bottom #}
+                                <label for="{{ field.id_for_label }}" class="form-label fw-semibold text-dark">{{ field.label }}</label>
+                                {% if field.field.widget.input_type == 'file' %}
+                                    {{ field|add_class:"form-control-file" }} {# Specific class for file inputs #}
+                                {% else %}
+                                    {{ field|add_class:"form-control form-control-lg" }}
+                                {% endif %}
+                                {% if field.help_text %}
+                                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                                {% endif %}
+                                {% for error in field.errors %}
+                                    <div class="alert alert-danger mt-2 small">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                        <div class="d-grid gap-3 d-md-flex justify-content-md-between mt-4"> {# Buttons align start/end #}
+                            <a href="{% url 'mark_entry_selection' %}" class="btn btn-secondary btn-lg flex-grow-1 flex-md-grow-0">
+                                <i class="fas fa-arrow-left me-2"></i> Back to Mark Selection
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg flex-grow-1 flex-md-grow-0">
+                                <i class="fas fa-upload me-2"></i> Upload Marks
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-5 shadow-sm border-0 rounded-3"> {# Template Guidelines card #}
+        <div class="card-header bg-info text-white py-3 rounded-top-3">
+            <h5 class="mb-0 fs-5"><i class="fas fa-info-circle me-2"></i>Excel File Template Guidelines</h5>
+        </div>
+        <div class="card-body p-4">
+            <p class="lead">Your Excel file (.xlsx format) should have the following exact column headers in the first row:</p>
+            <ul class="list-group list-group-flush mb-4"> {# Styled list #}
+                <li class="list-group-item d-flex align-items-center">
+                    <span class="badge bg-primary rounded-pill me-2">1</span> <code>Admission_Number</code>
+                </li>
+                <li class="list-group-item d-flex align-items-center">
+                    <span class="badge bg-primary rounded-pill me-2">2</span> <code>First_Name</code>
+                </li>
+                <li class="list-group-item d-flex align-items-center">
+                    <span class="badge bg-primary rounded-pill me-2">3</span> <code>Middle_Name</code> (Optional)
+                </li>
+                <li class="list-group-item d-flex align-items-center">
+                    <span class="badge bg-primary rounded-pill me-2">4</span> <code>Last_Name</code>
+                </li>
+                <li class="list-group-item d-flex align-items-center">
+                    <span class="badge bg-primary rounded-pill me-2">5</span> <code>Subject_Code</code>
+                </li>
+                <li class="list-group-item d-flex align-items-center">
+                    <span class="badge bg-primary rounded-pill me-2">6</span> <code>Score</code> (Integer between 0 and 100)
+                </li>
+            </ul>
+            <p class="lead">Example:</p>
+            <div class="bg-light p-3 border rounded-3 mb-4"> {# Styled code block #}
+                <pre class="mb-0"><code class="text-dark">Admission_Number,First_Name,Middle_Name,Last_Name,Subject_Code,Score
+SIBWESA/2025/001,John,K,Doe,MATH001,85
+SIBWESA/2025/002,Jane,,Smith,ENG001,72
+SIBWESA/2025/001,John,,Doe,ENG001,90
+</code></pre>
+            </div>
+            <p class="text-muted small">
+                <i class="fas fa-info-circle me-1"></i> Rows with missing Admission Number or Subject Code will be skipped.<br>
+                <i class="fas fa-exclamation-circle me-1"></i> Invalid Admission Numbers or Subject Codes will result in errors.<br>
+                <i class="fas fa-exclamation-triangle me-1"></i> Scores outside the 0-100 range will be marked as errors.<br>
+                <i class="fas fa-sync-alt me-1"></i> Existing marks for the same student, subject, and examination will be updated.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

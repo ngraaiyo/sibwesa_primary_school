@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Admin Dashboard</h1>
+<p>Welcome, {{ user.username }}!</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header bg-success text-white">Pending User Approvals</div>
+            <div class="card-body">
+                <p>Manage users awaiting approval:</p>
+                {# This one correctly uses a built-in Django admin namespace #}
+                <a href="{% url 'admin:users_customuser_changelist' %}?is_approved__exact=0" class="btn btn-success">View Pending Users</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header bg-info text-white">Quick Links</div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    {# This one correctly uses a built-in Django admin namespace #}
+                    <li><a href="{% url 'admin:index' %}" class="btn btn-outline-info btn-sm mb-2 w-100">Go to Django Admin Panel</a></li>
+
+                    {# FIX: Changed 'student_list' to 'all_students' and removed 'students:' prefix #}
+                    <li><a href="{% url 'all_students' %}" class="btn btn-outline-info btn-sm mb-2 w-100">Manage All Students</a></li>
+
+                    {# FIX: Removed 'students:' prefix from these #}
+                    <li><a href="{% url 'class_list' %}" class="btn btn-outline-info btn-sm mb-2 w-100">Manage All Classes</a></li>
+                    <li><a href="{% url 'subject_list' %}" class="btn btn-outline-info btn-sm mb-2 w-100">Manage All Subjects</a></li>
+                    <li><a href="{% url 'examination_list' %}" class="btn btn-outline-info btn-sm mb-2 w-100">Manage All Exams</a></li>
+
+                    {# FIX: Removed 'students:' prefix from these #}
+                    <li><a href="{% url 'mark_entry_selection' %}" class="btn btn-outline-info btn-sm mb-2 w-100">Enter Marks (Manual/Bulk)</a></li> 
+                    <li><a href="{% url 'mark_list' %}" class="btn btn-outline-info btn-sm mb-2 w-100">View All Marks</a></li> 
+                    <li><a href="{% url 'result_selection' %}" class="btn btn-outline-info btn-sm mb-2 w-100">Generate Student Results</a></li>
+                    <li><a href="{% url 'notification_list' %}" class="btn btn-outline-info btn-sm mb-2 w-100">Manage School Notifications</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

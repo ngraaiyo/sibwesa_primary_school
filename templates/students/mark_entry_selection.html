@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %} {# ADD THIS LINE RIGHT AFTER {% extends ... %} #}
+
+{% block title %}Mark Entry Selection - Sibwesa Primary School{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold text-primary">Mark Entry Selection</h1>
+        <p class="lead text-muted">Effortlessly select parameters to enter or manage student marks.</p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-primary text-white text-center py-3 rounded-top-4">
+                    <h5 class="mb-0 fs-5"><i class="fas fa-edit me-2"></i>Choose Mark Entry Parameters</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" id="markSelectionForm">
+                        {% csrf_token %}
+                        {% for field in form %}
+                            <div class="mb-4">
+                                <label for="{{ field.id_for_label }}" class="form-label fw-semibold text-dark">{{ field.label }}</label>
+                                {{ field|add_class:"form-control form-control-lg" }}
+                                {% if field.help_text %}
+                                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                                {% endif %}
+                                {% for error in field.errors %}
+                                    <div class="alert alert-danger mt-2 small">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                        <div class="d-grid gap-3 d-md-flex justify-content-md-end mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg flex-grow-1 flex-md-grow-0">
+                                <i class="fas fa-arrow-right me-2"></i> Proceed to Manual Entry
+                            </button>
+                            {# Excel Upload Button - Initially hidden, shown with JS #}
+                            <a href="#" id="uploadExcelButton" class="btn btn-outline-success btn-lg flex-grow-1 flex-md-grow-0" style="display:none;">
+                                <i class="fas fa-file-excel me-2"></i> Upload Marks via Excel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const examinationSelect = document.getElementById('id_examination');
+        const uploadButton = document.getElementById('uploadExcelButton');
+
+        function updateUploadButtonVisibility() {
+            if (examinationSelect.value) {
+                uploadButton.style.display = 'inline-flex';
+                uploadButton.href = "{% url 'mark_excel_upload' %}?exam_id=" + examinationSelect.value;
+            } else {
+                uploadButton.style.display = 'none';
+            }
+        }
+
+        // This block for dynamically adding classes can be removed if widget_tweaks is fully used for all fields.
+        // However, if some fields aren't getting styled by widget_tweaks for some reason, this can be a fallback.
+        // For <select> elements, 'form-select' is more appropriate than 'form-control'.
+        document.querySelectorAll('#markSelectionForm select').forEach(select => {
+            select.classList.add('form-select', 'form-select-lg');
+        });
+
+        // Initial check on page load
+        updateUploadButtonVisibility();
+
+        // Update on change
+        examinationSelect.addEventListener('change', updateUploadButtonVisibility);
+    });
+</script>
+{% endblock %}

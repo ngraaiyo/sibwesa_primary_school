@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block title %}Attendance - Sibwesa Primary School{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Attendance Management</h1>
+<p class="lead">{{ message }}</p>
+<a href="{% url 'teacher_dashboard' %}" class="btn btn-primary mt-3">Back to Dashboard</a>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Upload Students Excel{% endblock %}
+{% block page_heading %}Bulk Upload Students{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4"> {# Added py-4 for top/bottom padding #}
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <h1 class="mb-4 text-center">{{ page_heading }}</h1>
+            <p class="lead text-center">Use this page to bulk upload student information from an Excel file.</p>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Upload Excel File</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            {{ form.excel_file.label_tag }}
+                            {{ form.excel_file|add_class:"form-control" }}
+                            {% if form.excel_file.help_text %}
+                                <div class="form-text text-muted">{{ form.excel_file.help_text }}</div>
+                            {% endif %}
+                            {% for error in form.excel_file.errors %}
+                                <div class="alert alert-danger mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <p class="mt-4">
+                            Need a template? Download our sample Excel file to ensure correct column headers and format:
+                            {# IMPORTANT: Replace 'students/excel_template.xlsx' with the actual path to your template file in static/ #}
+                            <a href="{% static 'students/excel_template.xlsx' %}" class="btn btn-outline-secondary btn-sm mt-2">
+                                <i class="fas fa-download me-2"></i> Download Sample Template
+                            </a>
+                        </p>
+
+                        <button type="submit" class="btn btn-primary mt-3 me-2">Upload Excel</button>
+                        <a href="{% url 'all_students' %}" class="btn btn-secondary mt-3">Cancel</a>
+                    </form>
+
+                    <h6 class="mt-5 mb-3">Excel File Format Requirements:</h6>
+                    <p class="text-muted">Your Excel file should have the following column headers (case-insensitive, but match these for best results):</p>
+                    <ul>
+                        <li>`first_name` (Required)</li>
+                        <li>`middle_name` (Optional)</li>
+                        <li>`last_name` (Required)</li>
+                        <li>`date_of_birth` (e.g., YYYY-MM-DD or a recognized date format)</li>
+                        <li>`gender` (e.g., Male, Female, Other)</li>
+                        <li>`admission_number` (Required - Must be unique)</li>
+                        <li>`current_class_name` (Required - Must exactly match an existing class name in the system, e.g., "Standard 1 (2025)")</li>
+                    </ul>
+                    <small class="text-muted">Any rows with missing required data or non-existent classes will be skipped. Review warnings after upload.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,80 @@
+{# users/templates/users/document_form.html #}
+{% extends 'base.html' %}
+
+{% block title %}{% if form.instance.pk %}Edit Document{% else %}Upload New Document{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-lg border-0 mb-4">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3">
+            <h4 class="mb-0">
+                {% if form.instance.pk %}
+                    <i class="bi bi-pencil-square me-2"></i>Edit Document
+                {% else %}
+                    <i class="bi bi-file-earmark-plus me-2"></i>Upload New Document
+                {% endif %}
+            </h4>
+            <a href="{% url 'document_list' %}" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-arrow-left me-2"></i>Back to Documents
+            </a>
+        </div>
+        <div class="card-body">
+            {# IMPORTANT: enctype="multipart/form-data" is required for file uploads #}
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="{{ form.title.id_for_label }}" class="form-label">Title</label>
+                    {{ form.title }}
+                    {% if form.title.help_text %}
+                        <div class="form-text">{{ form.title.help_text }}</div>
+                    {% endif %}
+                    {% for error in form.title.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-3">
+                    <label for="{{ form.description.id_for_label }}" class="form-label">Description (Optional)</label>
+                    {{ form.description }}
+                    {% if form.description.help_text %}
+                        <div class="form-text">{{ form.description.help_text }}</div>
+                    {% endif %}
+                    {% for error in form.description.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-3">
+                    <label for="{{ form.file.id_for_label }}" class="form-label">Select File</label>
+                    {{ form.file }}
+                    {% if form.file.help_text %}
+                        <div class="form-text">{{ form.file.help_text }}</div>
+                    {% endif %}
+                    {% for error in form.file.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                {# Optional: Global non-field errors #}
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-upload me-2"></i>{% if form.instance.pk %}Update Document{% else %}Upload Document{% endif %}
+                    </button>
+                    <a href="{% url 'document_list' %}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle-fill me-2"></i>Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

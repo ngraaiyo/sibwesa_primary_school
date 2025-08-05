@@ -1,0 +1,308 @@
+/* users/css/dashboard.css */
+
+/* --- Overall Site Layout --- */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden; /* Prevent horizontal scrollbar */
+}
+
+body {
+    display: flex; /* Makes the #wrapper the main flex item */
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+#wrapper {
+    display: flex; /* Arranges sidebar-wrapper and page-content-wrapper horizontally */
+    flex-grow: 1; /* Allows wrapper to take all available vertical space */
+    width: 100%;
+    overflow: hidden; /* Crucial for preventing horizontal scroll when sidebar is hidden */
+}
+
+/* --- Sidebar Styling --- */
+#sidebar-wrapper {
+    background-color: #343a40;
+    color: #fff;
+    width: 250px; /* Fixed width for the sidebar */
+    flex-shrink: 0; /* Prevents sidebar from shrinking */
+    transition: margin .25s ease-out; /* Smooth toggle animation */
+    display: flex;
+    flex-direction: column; /* Stacks sidebar content vertically */
+    /*min-height: 100vh; /* Ensures it extends full height */
+    position: sticky; /* Keep it fixed at the top */
+    top: 0; /* Stick to the top of the viewport */
+    z-index: 1000; /* Ensure it's above other content if needed */
+}
+
+.sidebar-heading {
+    display: flex;
+    align-items: center;
+    padding: 0.875rem 1.25rem;
+    font-size: 1.2rem;
+    color: #fff;
+    background-color: #212529;
+    flex-shrink: 0;
+}
+
+.sidebar-logo {
+    height: 30px;
+    width: auto;
+    vertical-align: middle;
+    margin-right: 0.5rem;
+}
+
+#sidebar-wrapper .list-group {
+    flex-grow: 1; /* Allows the list group to fill available vertical space */
+    display: flex;
+    flex-direction: column;
+}
+
+#sidebar-wrapper .list-group-item {
+    background-color: #343a40;
+    color: #f8f9fa;
+    border-top: 1px solid rgba(255, 255, 255, .1);
+    border-bottom: none;
+    padding: 0.75rem 1.25rem;
+}
+
+#sidebar-wrapper .list-group-item:hover {
+    background-color: #495057;
+    color: #fff;
+}
+
+#sidebar-wrapper .list-group-item.active {
+    background-color: #007bff;
+    color: #fff;
+}
+
+#sidebar-wrapper .collapse .list-group-item {
+    background-color: #424951; /* Darker for sub-items */
+    padding-left: 2.25rem; /* Indent sub-items */
+}
+
+#sidebar-wrapper .collapse .list-group-item:hover {
+    background-color: #575f68;
+}
+
+/* --- Page Content Wrapper Styling --- */
+#page-content-wrapper {
+    display: flex;
+    flex-direction: column; /* Stacks navbar, main content, and footer vertically */
+    flex-grow: 1; /* Allows page-content-wrapper to fill remaining horizontal space and grow vertically */
+    overflow-x: hidden; /* Prevents horizontal scroll from content that might exceed viewport */
+    /*min-height: 100vh; /* Ensures it takes at least 100% of its parent's height (which is body) */
+    width: 100%; /* Default width */
+    transition: margin .25s ease-out; /* Smooth transition for content shift */
+}
+
+#main-content-area {
+    flex-grow: 1; /* CRITICAL: This pushes the footer down to the bottom */
+    padding: 1.5rem; /* Standard padding for content */
+    background-color: #f9faf8; /* Light background for content area */
+    padding-bottom: 70px;
+}
+
+/* --- Sidebar Toggle State --- */
+#wrapper.toggled #sidebar-wrapper {
+    margin-left: -250px; /* Hides sidebar off-screen to the left */
+}
+
+/* When toggled, the content wrapper takes up the full width */
+#wrapper.toggled #page-content-wrapper {
+    width: 100%;
+    margin-left: 0; /* No margin needed if sidebar is hidden */
+}
+
+/* --- Responsive Adjustments --- */
+@media (min-width: 768px) {
+    #sidebar-wrapper {
+        margin-left: 0; /* Sidebar always visible by default on larger screens */
+    }
+    #page-content-wrapper {
+        width: calc(100% - 250px); /* Content takes remaining width */
+    }
+    #wrapper.toggled #sidebar-wrapper {
+        margin-left: -250px; /* Still hides sidebar when toggled on large screens */
+    }
+    #wrapper.toggled #page-content-wrapper {
+        width: 100%; /* Content expands to full width when sidebar is hidden on large screens */
+        margin-left: 0;
+    }
+}
+
+/* --- Top Navbar in Page Content Wrapper --- */
+#page-content-wrapper .navbar {
+    padding: 0.5rem 1rem; /* Adjust padding for the top navbar */
+}
+
+#page-content-wrapper .navbar-brand {
+    font-size: 1.25rem;
+}
+
+/* --- User Dropdown in Navbar --- */
+.navbar-nav .nav-item .nav-link img {
+    border: 1px solid #ccc; /* Subtle border for user icon */
+}
+
+/* --- Footer --- */
+#main-site-footer { /* Renamed for clarity */
+    background-color: #e9ecef;
+    color: #343a40;
+    text-align: center;
+    padding: 1rem 0;
+    width: 100%;
+    flex-shrink: 0; /* Prevents footer from shrinking */
+    z-index: 10;
+}
+
+/* --- Card and Chart Specific Styles (Aggressively Compact) - Re-added these from previous suggestions --- */
+.card {
+    border: 1px solid rgba(0,0,0,.125);
+    border-radius: 0.25rem;
+    background-color: #fff;
+    box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,.075);
+    height: 100%; /* Crucial for cards in flex columns */
+    display: flex;
+    flex-direction: column; /* Make card content a flex column */
+}
+
+/* Specific styles for the small info cards (Total Students, Total Exams, etc.) */
+.compact-info-card .card-header {
+    padding: 0.3rem 0.5rem; /* Even smaller padding */
+    font-size: 0.7rem; /* Smallest font */
+    text-align: center;
+}
+
+.compact-info-card .card-body {
+    padding: 0.4rem; /* Drastically reduced padding */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1; /* Allow body to grow */
+}
+
+.compact-info-card .student-icon { /* Using this for general icons on compact cards */
+    width: 25px !important; /* Extremely small icon */
+    height: 25px !important;
+    margin-bottom: 0.1rem !important; /* Minimal margin */
+}
+
+.compact-info-card h2.display-4 {
+    font-size: 1.1rem !important; /* Very very small large number */
+    margin-bottom: 0 !important; /* No margin below number */
+}
+
+.compact-info-card p,
+.compact-info-card small {
+    font-size: 0.6rem; /* Smallest text */
+    margin-bottom: 0 !important;
+    line-height: 1; /* Compact line height */
+}
+
+/* Adjustments for the main Student Chart card (which is larger) */
+.card.equal-height .card-body {
+    flex-grow: 1;
+    padding: 0.8rem; /* Slightly reduced padding */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.card.equal-height .card-header {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.9rem;
+    text-align: left;
+}
+.card-body .d-flex.justify-content-around.mt-3 > div {
+    font-size: 0.7rem;
+}
+.card-body .d-flex.justify-content-around.mt-3 .fw-bold {
+    font-size: 1rem;
+}
+
+/* Calendar specific adjustments for compactness */
+#calendar-card .card-body {
+    padding: 0.5rem; /* Make calendar card body very compact */
+}
+#calendar.compact-calendar #calendar-month-year {
+    font-size: 0.75rem;
+    margin-bottom: 0.2rem !important;
+}
+#calendar.compact-calendar .d-grid > div {
+    font-size: 0.55rem !important; /* Very small date numbers */
+    padding: 0.03rem; /* Tiny padding */
+}
+#calendar.compact-calendar .d-grid {
+    gap: 0.05rem !important; /* Minimal gap between days */
+}
+
+/* Notification list adjustments for compactness */
+.notification-list .card-body {
+    padding: 0.5rem; /* Adjusted padding for notification card body */
+}
+.notification-list .list-group-item {
+    padding: 0.3rem 0.5rem; /* More compact items */
+    font-size: 0.65rem;
+}
+.notification-list .notification-tag {
+    font-size: 0.5em;
+    padding: 0.02rem 0.2rem;
+    margin-bottom: 0.02rem !important; /* Reduced margin */
+}
+.notification-list p.mb-1 {
+    margin-bottom: 0.02rem !important;
+}
+.notification-list small.text-muted {
+    font-size: 0.55em;
+}
+
+/* Existing CSS for sidebar and wrapper */
+#wrapper {
+    display: flex; /* Ensures sidebar and content are side-by-side */
+    /* Add any other wrapper styles */
+}
+
+#sidebar-wrapper {
+    /* Your existing sidebar styles, e.g., width, background, etc. */
+    min-height: 100vh; /* Ensures sidebar is full height */
+    margin-left: -15rem; /* For toggling */
+    transition: margin .25s ease-out;
+    background-color: #343a40; /* Example dark background */
+}
+
+#wrapper.toggled #sidebar-wrapper {
+    margin-left: 0;
+}
+
+#page-content-wrapper {
+    min-width: 0; /* Required for flex-grow */
+    width: 100%; /* Take up remaining width */
+    display: flex; /* Important for flex-column layout */
+    flex-direction: column; /* Stack children vertically */
+    /* Add padding as needed */
+}
+
+.container-fluid.flex-grow-1.overflow-auto {
+    /* This is the div that will hold your main page content */
+    flex-grow: 1; /* This makes the content area expand to fill available space */
+    overflow-y: auto; /* This makes *only the content area* scroll */
+    padding-bottom: 20px; /* Optional: Add some padding before the footer */
+}
+
+#dashboard-footer {
+    /* Your existing footer styles */
+    background-color: #f8f9fa; /* Example light background */
+    border-top: 1px solid #e9ecef;
+    flex-shrink: 0; /* Prevents footer from shrinking if content is too tall */
+}
+
+/* Other styles for your cards, etc. */
+.equal-height {
+    height: 100%;
+}
+
+

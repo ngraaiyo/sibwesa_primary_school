@@ -1,0 +1,48 @@
+{# users/templates/users/notification_detail.html #}
+{% extends 'base.html' %}
+
+{% block title %}Notification: {{ notification.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Notification Details</h1>
+        {# Optional: Add a back button at the top #}
+        <a href="{% url 'notification_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Back to List
+        </a>
+    </div>
+
+    <div class="card shadow-lg border-0 mb-4"> {# Added shadow-lg and border-0 for more prominence #}
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3"> {# Darker header #}
+            <h4 class="mb-0"><i class="bi bi-bell-fill me-2"></i>{{ notification.title }}</h4> {# Added bell icon #}
+            <span class="badge {{ notification.get_tag_class }} fs-6 px-3 py-2"> {# Larger badge with padding #}
+                {{ notification.get_notification_type_display }}
+            </span>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <p class="mb-1"><strong><i class="bi bi-person-fill me-2"></i>From:</strong> {{ notification.notify_from }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p class="mb-1"><strong><i class="bi bi-calendar-check-fill me-2"></i>Published Date:</strong> {{ notification.published_date|date:"F d, Y H:i" }}</p>
+                </div>
+            </div>
+            <hr class="my-4"> {# More prominent separator #}
+            <h5 class="card-title mb-3">Message:</h5>
+            <div class="card p-3 bg-light border-start border-primary border-4 rounded"> {# Styled message box #}
+                <p class="card-text mb-0">{{ notification.message|linebreaksbr }}</p>
+            </div>
+        </div>
+        <div class="card-footer bg-light d-flex justify-content-end gap-2 py-3"> {# Added gap for spacing #}
+            <a href="{% url 'notification_update' notification.pk %}" class="btn btn-warning">
+                <i class="bi bi-pencil-square me-2"></i>Edit Notification
+            </a>
+            <a href="{% url 'notification_delete' notification.pk %}" class="btn btn-danger">
+                <i class="bi bi-trash-fill me-2"></i>Delete Notification
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

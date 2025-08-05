@@ -1,0 +1,39 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.main-content-wrapper {
+    min-height: 100vh;
+    padding: 40px 20px 80px; /* Bottom padding gives space above the footer */
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align form to top for easier scrolling */
+    background: rgba(255, 255, 255, 0.05); /* optional for visibility */
+}
+
+.transparent-card {
+    width: 100%;
+    max-width: 600px;
+    padding: 30px;
+    box-sizing: border-box;
+    background-color: rgba(255, 255, 255, 0.85);
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    margin-bottom: 40px;
+}
+
+footer#main-site-footer {
+    position: relative; /* Changed from fixed to relative */
+    width: 100%;
+    margin-top: auto;
+    padding: 10px 0;
+    background-color: rgba(210, 200, 200, 0.8);
+    text-align: center;
+    color: #333;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+}

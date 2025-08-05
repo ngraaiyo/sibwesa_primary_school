@@ -1,0 +1,190 @@
+{# students/templates/students/class_results_summary.html #}
+
+{% extends 'base.html' %} 
+{# No widget_tweaks needed here as no form fields are rendered directly #}
+
+{% block title %}Class Results Summary - Sibwesa Primary School{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 print-area"> {# Consistent container for spacing #}
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold text-primary">Class Results Summary</h1> {# Stronger heading #}
+        <p class="lead text-muted">Detailed performance overview for the selected class and examination.</p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card mb-4 shadow-sm border-0 rounded-3"> {# Stylish card for selected parameters #}
+        <div class="card-header bg-secondary text-white py-3 rounded-top-3"> {# Gradient header, a bit more padding #}
+            <h5 class="mb-0 fs-5"><i class="fas fa-info-circle me-2"></i>Results Overview</h5>
+        </div>
+        <div class="card-body p-4"> {# Generous padding #}
+            <div class="row">
+                <div class="col-md-6 mb-2 mb-md-0">
+                    <p class="mb-0 fs-5 text-dark">
+                        <strong><i class="bi bi-pencil-square"></i>Examination:</strong> <span class="fw-semibold">{{ examination.name }} ({{ examination.get_term_display }} - {{ examination.academic_year }})</span>
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0 fs-5 text-dark">
+                        <strong><i class="bi bi-people"></i></i>Class:</strong> <span class="fw-semibold">{{ class_obj.name }} ({{ class_obj.year }})</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-lg border-0 rounded-4 mb-4"> {# Main table card #}
+        <div class="card-header bg-primary text-white text-center py-3 rounded-top-4">
+            <h5 class="mb-0 fs-5"><i class="fas fa-table me-2"></i>Student Performance Table</h5>
+        </div>
+        <div class="card-body p-3"> {# Slightly less padding for table card body #}
+            <div class="table-responsive" id="printableArea">
+                <table class="table table-striped table-bordered table-hover compact-table">
+                    <thead class="bg-primary text-white"> {# Kept original primary background for table header #}
+                        <tr>
+                            <th class="text-center">Pos</th>
+                            <th class="text-center">Adm No.</th>
+                            <th>Student Name</th>
+                            {% for subject in all_subjects %}
+                                <th class="text-center">{{ subject.code }}</th>
+                            {% empty %}
+                                <th class="text-center">No Subjects Found</th>
+                            {% endfor %}
+                            <th class="text-center">Total</th>
+                            <th class="text-center">Avg</th>
+                            <th class="text-center">Grade</th>
+                            <th class="text-center d-print-none">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in results %}
+                        <tr>
+                            <td class="text-center">{{ result.position|default:"-" }}</td>
+                            <td class="text-center">{{ result.student.admission_number }}</td>
+                            <td class="student-name-cell">
+                                {{ result.student.first_name }}
+                                {% if result.student.middle_name %}
+                                    {{ result.student.middle_name }}
+                                {% endif %}
+                                {{ result.student.last_name }}
+                            </td>
+
+                            {% for subject_header in all_subjects %}
+                                <td class="text-center">
+                                    {% with found=False %}
+                                        {% for subject_detail in result.subject_details %}
+                                            {% if subject_detail.subject_code|upper == subject_header.code|upper and not found %}
+                                                {{ subject_detail.score|default:"-" }}
+                                                {% with True as found %}{% endwith %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% if not found %}{% endif %}
+                                    {% endwith %}
+                                </td>
+                            {% endfor %}
+
+                            <td class="text-center">{{ result.total_score|default:"-" }}</td>
+                            <td class="text-center">{{ result.average_score|floatformat:2|default:"-" }}</td>
+                            <td class="text-center">{{ result.overall_grade|default:"-" }}</td>
+                            <td class="text-center d-print-none">
+                                <a href="{% url 'student_result_slip' exam_id=examination.id student_id=result.student.id %}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-file-alt me-1"></i> View Result Slip
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="{{ all_subjects|length|add:7 }}" class="text-center py-4 text-muted">
+                                <i class="fas fa-exclamation-circle me-2"></i> No results found for this class and examination. Please ensure marks have been entered.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <a href="{% url 'result_selection' %}" class="btn btn-secondary btn-lg">
+            <i class="fas fa-arrow-left me-2"></i> Back to Selection
+        </a>
+        <a href="{% url 'class_summary_pdf' exam_id=examination.id class_id=class_obj.id %}" class="btn btn-primary btn-lg d-print-none" target="_blank">
+            <i class="fas fa-print me-2"></i> Print Class Summary
+        </a>
+        
+        <a href="{% url 'class_summary_pdf' exam_id=examination.id class_id=class_obj.id %}?download=true" class="btn btn-danger d-print-none">
+            <i class="bi bi-filetype-pdf"></i> Download PDF
+        </a>
+        </div>
+</div>
+{% endblock content %}
+
+{% block extra_css %}
+<style>
+    /* Custom CSS for compact table and consistent styling */
+    .compact-table th, .compact-table td {
+        padding: 0.5rem !important; /* Adjust as needed for compact look */
+        font-size: 0.5rem; /* Smaller font size for table content */
+        vertical-align: middle; /* Center content vertically */
+    }
+
+    .container.print-area {
+    max-width: 100% !important;
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+    }
+
+    /* Gradient background for headers - define in your main CSS or base.html */
+    .bg-gradient-primary {
+        background: linear-gradient(to right, var(--bs-primary), var(--bs-primary-light, #6610f2)); /* Example, define colors in :root or variables */
+    }
+    .bg-gradient-secondary {
+        background: linear-gradient(to right, var(--bs-secondary), var(--bs-secondary-light, #6c757d)); /* Example */
+    }
+
+    .student-name-cell {
+        min-width: 300px; /* Adjust this value to increase the width of the column */
+        max-width: 350px; /* Optional: Set a max width to prevent it from getting too wide */
+        text-align: left; /* Align the text to the left */
+        white-space: normal;
+        text-align: left;
+    }
+
+    #printableArea {
+    width: 100%;
+}
+
+    @media print {
+    body * {
+        visibility: hidden;
+    }
+    .print-area, .print-area * {
+        visibility: visible;
+    }
+    .d-print-none, .btn, nav, footer {
+        display: none !important;
+    }
+    @page {
+        size: A4;
+        margin: 20mm;
+    }
+    body {
+        font-family: Arial, sans-serif;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+{# Ensure Font Awesome is loaded if not in base.html #}
+<script src="https://kit.fontawesome.com/YOUR_FONT_AWESOME_KIT_ID.js" crossorigin="anonymous"></script> {# REMEMBER TO REPLACE THIS WITH YOUR ACTUAL FONT AWESOME KIT ID #}
+{% endblock %}

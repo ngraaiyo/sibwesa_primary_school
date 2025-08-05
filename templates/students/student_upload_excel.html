@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Student Data - Sibwesa Primary School{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Upload Student Data (Excel)</h1>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Upload Excel File</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">Please upload an Excel file (.xlsx or .xls) containing student data. The file should have the following exact column headers in the first row:</p>
+                <ul class="list-group list-group-flush mb-4">
+                    <li class="list-group-item"><strong>First Name</strong> (required)</li>
+                    <li class="list-group-item"><strong>Middle Name</strong> (optional)</li>
+                    <li class="list-group-item"><strong>Last Name</strong> (required)</li>
+                    <li class="list-group-item"><strong>Date of Birth</strong> (required, format: YYYY-MM-DD or Excel date)</li>
+                    <li class="list-group-item"><strong>Gender</strong> (required, M/F/O)</li>
+                    <li class="list-group-item"><strong>Admission Number</strong> (required, must be unique)</li>
+                    <li class="list-group-item"><strong>Class Name</strong> (required, e.g., "Standard One")</li>
+                    <li class="list-group-item"><strong>Class Year</strong> (required, e.g., 2025)</li>
+                </ul>
+                <p class="text-muted small">If a 'Class Name' and 'Class Year' combination does not exist, it will be created automatically with no assigned class teacher initially.</p>
+
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="excel_file" class="form-label">Select Excel File:</label>
+                        <input type="file" class="form-control" id="excel_file" name="excel_file" accept=".xlsx, .xls" required>
+                    </div>
+                    <button type="submit" class="btn btn-success me-2">Upload Data</button>
+                    <a href="{% url 'student_list' %}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Class Results Summary</title>
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        font-size: 11px;
+        padding: 30px;
+        margin-left: 5px;
+        margin-right: 5px
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .header h2 {
+        margin: 0;
+    }
+
+    .summary {
+        margin-bottom: 10px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        table-layout: fixed;
+    }
+
+    th, td {
+        border: 1px solid #444;
+        padding: 5px 2px;
+        text-align: center;
+        overflow: hidden;
+        word-wrap: break-word;
+    }
+
+    th {
+        background-color: #f0f0f0;
+        white-space: nowrap;
+    }
+    
+    /* Adjusted widths for each column */
+    tr th:nth-child(1),
+    tr td:nth-child(1) { /* Pos */
+        width: 4%;
+    }
+    tr th:nth-child(2),
+    tr td:nth-child(2) { /* Name is now the 2nd column */
+        width: 25%; /* Increased width */
+        text-align: left;
+    }
+    
+    /* Subject columns now start from the 3rd child */
+    tr th:nth-child(n+3):nth-last-child(n+3),
+    tr td:nth-child(n+3):nth-last-child(n+3) {
+      width: calc((100% - 4% - 25% - 7% - 7% - 6%) / 6);
+      /* NOTE: The divisor (6) here must match your number of subjects. */
+    }
+    
+    tr th:nth-last-child(3),
+    tr td:nth-last-child(3) { /* Total */
+        width: 7%;
+    }
+    tr th:nth-last-child(2),
+    tr td:nth-last-child(2) { /* Avg */
+        width: 7%;
+    }
+    tr th:nth-last-child(1),
+    tr td:nth-last-child(1) { /* Grade */
+        width: 6%;
+    }
+
+    .text-left {
+        text-align: left;
+    }
+    
+    .student-name-cell {
+        min-width: 200px;
+        word-wrap: break-word;
+        white-space: normal;
+        text-align: left;
+    }
+
+    @page {
+        margin: 20mm 20mm 30mm 20mm;
+        @bottom-center {
+            content: "Sibwesa Primary School | © {% now 'Y' %} | Page " counter(page) " of " counter(pages);
+            font-size: 10px;
+            color: #555;
+        }
+    }
+</style>
+</head>
+
+<body>
+    <div class="header">
+        <h2>Sibwesa Primary School</h2>
+        <p><strong>Class Results Summary</strong></p>
+        <p>{{ examination.name }} - {{ examination.get_term_display }} {{ examination.academic_year }}</p>
+        <p>Class: {{ class_obj.name }} ({{ class_obj.year }})</p>
+    </div>
+
+     <table>
+        <thead>
+            <tr>
+                <th>Pos</th>
+                <th class="text-left">Name</th>
+                {% for subject in all_subjects %}
+                <th>{{ subject.code }}</th>
+                {% endfor %}
+                <th>Total</th>
+                <th>Avg</th>
+                <th>Grade</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+            <tr>
+                <td class="text-center">{{ result.position|default:"-" }}</td>
+                <td class="student-name-cell"> {{ result.student.first_name }}
+                    {% if result.student.middle_name %}
+                        {{ result.student.middle_name }}
+                    {% endif %}
+                    {{ result.student.last_name }}
+                </td>
+                {% for subject_header in all_subjects %}
+                    <td>
+                        {% with found=False %}
+                            {% for subject_detail in result.subject_details %}
+                                {% if subject_detail.subject_code|upper == subject_header.code|upper and not found %}
+                                    {{ subject_detail.score }}
+                                    {% with True as found %}{% endwith %}
+                                {% endif %}
+                            {% endfor %}
+                            {% if not found %}{% endif %}
+                        {% endwith %}
+                    </td>
+                {% endfor %}
+                <td>{{ result.total_score }}</td>
+                <td>{{ result.average_score|floatformat:2 }}</td>
+                <td>{{ result.overall_grade }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

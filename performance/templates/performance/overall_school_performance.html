@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Overall School Performance{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-primary fw-bold d-flex align-items-center">
+        <i class="fas fa-school me-2"></i> {{ page_heading }}
+    </h1>
+
+    {% if message %}
+        <div class="alert alert-info">{{ message }}</div>
+    {% endif %}
+
+    {% if overall_school_pass_fail %}
+        <h2 class="h4 mb-3 text-dark">Summary for {{ overall_school_pass_fail.examination_name }}</h2>
+
+        <div class="row">
+            <!-- Total Students -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Students</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ overall_school_pass_fail.total_students }}</div>
+                        </div>
+                        <i class="fas fa-users fa-2x text-gray-300" title="Total Students"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Passed Students -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Passed Students (≥ {{ passing_score_threshold }})</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ overall_school_pass_fail.passed_students }}</div>
+                        </div>
+                        <i class="fas fa-check-circle fa-2x text-success" title="Passed"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Failed Students -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-danger shadow h-100 py-2">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Failed Students (&lt; {{ passing_score_threshold }})</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ overall_school_pass_fail.failed_students }}</div>
+                        </div>
+                        <i class="fas fa-times-circle fa-2x text-danger" title="Failed"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pass Rate -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Overall Pass Rate</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ overall_school_pass_fail.pass_rate|floatformat:2 }}%</div>
+                            </div>
+                            <i class="fas fa-percent fa-2x text-info"></i>
+                        </div>
+                        <div class="progress mt-2">
+                            <div class="progress-bar bg-info" role="progressbar"
+                                 style="width: {{ overall_school_pass_fail.pass_rate|floatformat:0 }}%"
+                                 aria-valuenow="{{ overall_school_pass_fail.pass_rate|floatformat:0 }}"
+                                 aria-valuemin="0" aria-valuemax="100">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Class-wise Summary Table -->
+        <div class="card shadow mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-chart-bar me-2"></i>Class-wise Pass/Fail Summary
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="classPassFailTable">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Class Name</th>
+                                <th class="text-center">Total Students</th>
+                                <th class="text-center">Passed</th>
+                                <th class="text-center">Failed</th>
+                                <th class="text-center">Pass Rate</th>
+                                <th class="text-center">Fail Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for class_data in per_class_pass_fail %}
+                                <tr>
+                                    <td><i class="fas fa-chalkboard me-2"></i>{{ class_data.class_name }}</td>
+                                    <td class="text-center">{{ class_data.total_students }}</td>
+                                    <td class="text-center"><span class="badge bg-success text-white">{{ class_data.passed_students }}</span></td>
+                                    <td class="text-center"><span class="badge bg-danger text-white">{{ class_data.failed_students }}</span></td>
+                                    <td class="text-center">
+                                        {{ class_data.pass_rate|floatformat:2 }}%
+                                        <div class="progress mt-1">
+                                            <div class="progress-bar bg-success"
+                                                 style="width: {{ class_data.pass_rate|floatformat:0 }}%">
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        {{ class_data.fail_rate|floatformat:2 }}%
+                                        <div class="progress mt-1">
+                                            <div class="progress-bar bg-danger"
+                                                 style="width: {{ class_data.fail_rate|floatformat:0 }}%">
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr><td colspan="6" class="text-center">No class data available.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="row">
+            <div class="col-lg-8 mb-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-primary">Class-wise Pass Rate Trend</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="classPassRateChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-primary">Pass/Fail Distribution</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="overallPassFailDoughnutChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% else %}
+        <div class="alert alert-warning">
+            No overall school performance data available. Please ensure results are recorded.
+        </div>
+    {% endif %}
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const classNames = [];
+    const passRates = [];
+    {% for class_data in per_class_pass_fail %}
+        classNames.push("{{ class_data.class_name }}");
+        passRates.push({{ class_data.pass_rate|floatformat:2 }});
+    {% endfor %}
+
+    if (classNames.length > 0 && document.getElementById('classPassRateChart')) {
+        new Chart(document.getElementById('classPassRateChart'), {
+            type: 'bar',
+            data: {
+                labels: classNames,
+                datasets: [{
+                    label: 'Pass Rate (%)',
+                    data: passRates,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: { display: true, text: 'Pass Rate (%)' }
+                    }
+                }
+            }
+        });
+    }
+
+    const totalPassed = {{ overall_school_pass_fail.passed_students|default:0 }};
+    const totalFailed = {{ overall_school_pass_fail.failed_students|default:0 }};
+
+    if ((totalPassed + totalFailed) > 0 && document.getElementById('overallPassFailDoughnutChart')) {
+        new Chart(document.getElementById('overallPassFailDoughnutChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Passed', 'Failed'],
+                datasets: [{
+                    data: [totalPassed, totalFailed],
+                    backgroundColor: ['#28a745', '#dc3545']
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+    }
+});
+</script>
+{% endblock extra_js %}

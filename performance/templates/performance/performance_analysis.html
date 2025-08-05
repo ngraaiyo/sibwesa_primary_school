@@ -1,0 +1,133 @@
+{# performance/templates/performance/performance_analysis.html #}
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}{{ page_heading }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold text-primary">{{ page_heading }}</h1>
+    </div>
+
+    <div class="card shadow-lg mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="bi bi-funnel-fill me-2"></i>Filter Analysis Data</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{% url 'performance_analysis' %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                    {{ form.examination.label_tag }}
+                    {{ form.examination }}
+                    {% for error in form.examination.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search me-2"></i>Generate Analysis
+                </button>
+            </form>
+        </div>
+    </div>
+
+    {% if analysis_data %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card shadow-lg mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Overall Subject Averages ({{ selected_examination.name }} - {{ selected_examination.term }})</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Subject</th>
+                                        <th>Average Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for data in analysis_data.overall_subject_averages %}
+                                        <tr>
+                                            <td>{{ data.subject__name }}</td>
+                                            <td>{{ data.avg_score|floatformat:2 }}</td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr><td colspan="2" class="text-center text-muted">No overall subject averages found for this examination.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card shadow-lg mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-bar-chart-fill me-2"></i>Class-wise Subject Averages ({{ selected_examination.name }} - {{ selected_examination.term }})</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if analysis_data.class_subject_averages_structured %}
+                            {% for class_name, class_details in analysis_data.class_subject_averages_structured.items %}
+                                <h6 class="mt-3 mb-2">Class: {{ class_name }} ({{ class_details.student_count|default:"N/A" }} Students)</h6>
+                                <div class="table-responsive mb-4">
+                                    <table class="table table-bordered table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Subject</th>
+                                                <th>Average Score</th>
+                                                {# You could add more columns here, e.g., 'Number of Students with Marks' #}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for subject_name in analysis_data.all_subjects %}
+                                                <tr>
+                                                    <td>{{ subject_name.name }}</td>
+                                                    <td>
+                                                        {% with subject_data=class_details.subjects|get_item:subject_name.name %}
+                                                            {% if subject_data %}
+                                                                {{ subject_data.avg_score|floatformat:2 }}
+                                                            {% else %}
+                                                                N/A
+                                                            {% endif %}
+                                                        {% endwith %}
+                                                    </td>
+                                                </tr>
+                                            {% empty %}
+                                                <tr><td colspan="2" class="text-center text-muted">No subject data for this class.</td></tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-center text-muted">No class-wise subject averages found for this examination.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% elif request.method == 'POST' %}
+        <div class="alert alert-info text-center" role="alert">
+            <p class="mb-0">Please select an examination to generate performance analysis.</p>
+        </div>
+    {% endif %}
+
+    <div class="mt-4 text-center">
+        <a href="{% url 'teacher_dashboard' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left-circle me-2"></i>Back to Dashboard
+        </a>
+    </div>
+
+</div>
+
+{# Custom template filter to access dictionary items by key #}
+{% load custom_filters %} {# Assuming you create a custom_filters.py #}
+
+{% endblock %}

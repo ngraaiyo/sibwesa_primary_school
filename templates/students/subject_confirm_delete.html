@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirm Delete - Subject{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">Confirm Delete</h5>
+            </div>
+            <div class="card-body">
+                <p>Are you sure you want to delete the subject: <strong>{{ subject.name }} ({{ subject.code }})</strong>?</p>
+                <p class="text-danger small">
+                    Deleting this subject is irreversible.
+                    {% if subject.examination_set.exists or subject.mark_set.exists %}
+                        <br><strong>Warning: This subject is linked to existing examinations or marks. You must delete or reassign those records first.</strong>
+                    {% endif %}
+                </p>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger me-2" {% if subject.examination_set.exists or subject.mark_set.exists %}disabled{% endif %}>Yes, Delete</button>
+                    <a href="{% url 'subject_list' %}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %} {# Add this line if you are using django-widget-tweaks #}
+
+{% block title %}Result Selection - Sibwesa Primary School{% endblock %}
+
+{% block content %}
+<div class="container py-4"> {# Add a container for better centering and padding #}
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold text-primary">Result Generation Selection</h1> {# Stronger heading #}
+        <p class="lead text-muted">Select the Examination and Class to view or generate results.</p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9"> {# Adjust column size for better responsiveness #}
+            <div class="card shadow-lg border-0 rounded-4"> {# Added shadow, no border, rounded corners #}
+                <div class="card-header bg-primary text-white text-center py-3 rounded-top-4"> {# Gradient background, padding, rounded corners #}
+                    <h5 class="mb-0 fs-5"><i class="fas fa-search me-2"></i>Choose Result Parameters</h5> {# Icon for visual appeal #}
+                </div>
+                <div class="card-body p-4"> {# Increased padding #}
+                    <form method="post">
+                        {% csrf_token %}
+                        {% for field in form %}
+                            <div class="mb-4"> {# Increased margin-bottom for better spacing #}
+                                <label for="{{ field.id_for_label }}" class="form-label fw-semibold text-dark">{{ field.label }}</label> {# Bold label #}
+                                {# Apply Bootstrap classes using widget_tweaks (recommended) #}
+                                {{ field|add_class:"form-select form-select-lg" }} {# Use form-select for select elements #}
+                                {% comment %}
+                                    If not using django-widget-tweaks, you'd apply class in forms.py like:
+                                    field.widget.attrs.update({'class': 'form-select form-select-lg'})
+                                {% endcomment %}
+
+                                {% if field.help_text %}
+                                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                                {% endif %}
+                                {% for error in field.errors %}
+                                    <div class="alert alert-danger mt-2 small">{{ error }}</div> {# Smaller alert for errors #}
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                        <div class="d-grid mt-4"> {# Use d-grid for full width button #}
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-chart-bar me-2"></i> View Class Summary
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // This JavaScript block is useful if you are NOT using django-widget-tweaks
+        // and need to dynamically apply Bootstrap classes to form fields.
+        // If you are using widget_tweaks and it's working, this block is optional
+        // but harmless. It primarily ensures all select elements get 'form-select'
+        // and 'form-select-lg' classes.
+        document.querySelectorAll('form select').forEach(select => {
+            if (!select.classList.contains('form-select')) { // Avoid adding duplicate classes if widget_tweaks already did
+                select.classList.add('form-select', 'form-select-lg');
+            }
+        });
+    });
+</script>
+{% endblock %}

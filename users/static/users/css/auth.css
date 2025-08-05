@@ -1,0 +1,35 @@
+/* users/css/auth.css */
+
+/* Apply flex to body ONLY for auth pages */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.login-page-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Makes this wrapper fill the body's height */
+}
+
+.login-content {
+    flex-grow: 1; /* Pushes the footer down */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+.login-card {
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.simple-footer {
+    background-color: #e9ecef; /* Match dashboard footer for consistency if desired */
+    color: #343a40;
+    padding: 1rem 0;
+    margin-top: auto; /* Pushes the footer to the bottom */
+}

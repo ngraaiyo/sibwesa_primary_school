@@ -1,0 +1,88 @@
+{# users/templates/users/document_list.html #}
+{% extends 'base.html' %}
+
+{% block title %}Manage Documents{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">School Documents</h1> {# Added mb-0 for consistent top margin #}
+        <a href="{% url 'document_upload' %}" class="btn btn-primary">
+            <i class="bi bi-file-earmark-plus me-2"></i>Upload New Document
+        </a>
+    </div>
+
+    {% if documents %}
+    <div class="card shadow-sm">
+        <div class="card-body p-0"> {# p-0 to remove padding around the table #}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover mb-0"> {# Added mb-0 to table to remove default bottom margin #}
+                    <thead class="table-dark"> {# Dark header for better contrast #}
+                        <tr>
+                            <th scope="col" class="text-white">Title</th>
+                            {# REMOVED: <th>Type</th> as document model doesn't have 'document_type' #}
+                            <th scope="col" class="text-white">Description</th> {# Added Description column #}
+                            <th scope="col" class="text-white">Uploaded By</th>
+                            <th scope="col" class="text-white">Uploaded At</th>
+                            <th scope="col" class="text-white text-center">Actions</th> {# Centered Actions header #}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for document in documents %}
+                        <tr>
+                            <td>
+                                <strong>{{ document.title }}</strong>
+                            </td>
+                            <td>{{ document.description|default:"N/A"|truncatechars:70 }}</td> {# Display description, with N/A if blank #}
+                            {# REMOVED: <td>{{ document.document_type }}</td> #}
+                            <td>{{ document.uploaded_by.username }}</td>
+                            <td>{{ document.uploaded_at|date:"M d, Y H:i" }}</td> {# Nicer date format #}
+                            {# MODIFIED: Added d-flex, gap, and text-nowrap for button layout #}
+                            <td class="text-center text-nowrap d-flex justify-content-center align-items-center gap-1">
+                                <a href="{{ document.file.url }}" class="btn btn-sm btn-info" target="_blank" data-bs-toggle="tooltip" data-bs-placement="top" title="Download Document">
+                                    <i class="bi bi-download"></i> Download
+                                </a>
+                                <a href="{% url 'document_update' document.pk %}" class="btn btn-sm btn-warning" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Document">
+                                    <i class="bi bi-pencil-square"></i> Edit
+                                </a>
+                                <a href="{% url 'document_delete' document.pk %}" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete Document">
+                                    <i class="bi bi-trash"></i> Delete
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    {# IMPROVED: "No documents found" message with Bootstrap alert styling #}
+    <div class="alert alert-info text-center" role="alert">
+        <h4 class="alert-heading">No Documents Found!</h4>
+        <p>There are currently no school documents uploaded.</p>
+        <hr>
+        <p class="mb-0">Click the button above to upload the first document.</p>
+    </div>
+    {% endif %}
+
+    {# NEW: Back to Admin Dashboard button #}
+    <div class="mt-4 text-center">
+        {# IMPORTANT: Replace 'admin_dashboard' with the actual URL name for your admin dashboard #}
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left-circle me-2"></i>Back to Admin Dashboard
+        </a>
+    </div>
+
+</div>
+
+{# Include Bootstrap JS with Popper.js for tooltips and other features #}
+{% block extra_js %}
+<script>
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,195 @@
+{# templates/users/register.html #}
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %} {# Make sure this line is present! #}
+
+{% block title %}Register - Sibwesa Primary School{% endblock %}
+
+{% block dashboard_css %}{% endblock dashboard_css %} {# This correctly prevents dashboard.css from loading #}
+
+{% block extra_head %}
+    {# Custom CSS for forms #}
+
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        body {
+            background-image: url("{% static 'users/img/school.jpg' %}");
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .main-content-wrapper {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Changed to center for vertical alignment of the card */
+            padding: 40px 20px;
+            overflow-y: auto;
+        }
+
+        .card.transparent-card {
+            /* NEW/MODIFIED STYLES FOR STYLISH & BLUR EFFECT */
+            background-color: rgba(255, 255, 255, 0.15); /* Very light, subtle background for the blur effect */
+            backdrop-filter: blur(8px); /* Apply blur effect to the background behind the card */
+            -webkit-backdrop-filter: blur(8px); /* For Safari browser support */
+            border-radius: 15px; /* Rounded corners for a softer look */
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); /* More prominent, stylish shadow */
+            border: 1px solid rgba(255, 255, 255, 0.18); /* Subtle white border */
+            padding: 20px 30px; /* Adjust padding inside the card for more space */
+            max-width: 450px; /* Control max width of the card */
+            width: 100%; /* Ensure it takes full width up to max-width */
+            transform: scale(0.95); /* Slightly scale down for a "popped" look */
+            transition: transform 0.3s ease-in-out; /* Smooth transition on hover/focus */
+        }
+
+        .card.transparent-card:hover {
+            transform: scale(1.0); /* Scale up slightly on hover */
+        }
+
+        .card-header {
+            background-color: rgba(0, 123, 255, 0.7) !important; /* Slightly transparent primary color for header */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3); /* Subtle separator */
+            border-top-left-radius: 15px; /* Match card border-radius */
+            border-top-right-radius: 15px; /* Match card border-radius */
+        }
+
+        h3.mb-0 {
+            color: #fff; /* White text for header */
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); /* Subtle text shadow */
+        }
+
+        .card-body {
+            color: #f8f9fa; 
+            font-weight: bold; /* Make labels bold */
+            text-shadow: 0.5px 0.5px 1px rgba(255, 255, 255, 0.2); 
+        }
+
+        /* Styling for the input fields themselves */
+        .form-control {
+            background-color: rgba(255, 255, 255, 0.2); /* Transparent input background */
+            border: 1px solid rgba(255, 255, 255, 0.3); /* Light border */
+            color: #fff; /* White text input */
+            padding: 10px 15px; /* Comfortable padding */
+            border-radius: 8px; /* Slightly rounded inputs */
+            /* Ensure text inside inputs is visible */
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.7); /* Lighter placeholder text */
+        }
+
+        .form-control:focus {
+            background-color: rgba(255, 255, 255, 0.3); /* Slightly more opaque on focus */
+            border-color: rgba(255, 255, 255, 0.5); /* Clearer border on focus */
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25); /* Subtle focus glow */
+            color: #fff; /* Keep text white on focus */
+        }
+
+        /* Styling for the register button */
+        .btn-primary {
+            background-color: #007bff; /* Standard blue button */
+            border-color: #007bff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+            border-color: #004085;
+        }
+
+        /* Styling for error messages */
+        .alert-danger {
+            background-color: rgba(220, 53, 69, 0.7); /* Slightly transparent red for errors */
+            border-color: rgba(220, 53, 69, 0.8);
+            color: #fff;
+        }
+
+        /* Styling for "Already have an account?" text and link */
+        p.mt-3.text-center {
+            color: #f8f9fa; /* Light text for login link text */
+        }
+
+        p.mt-3.text-center a {
+            color: #007bff; /* Blue for the link */
+            font-weight: bold;
+            text-decoration: none; /* No underline by default */
+        }
+
+        p.mt-3.text-center a:hover {
+            text-decoration: underline; /* Underline on hover */
+        }
+
+        /* Footer styling - keep these as they are if they work for your base.html footer */
+        footer#main-site-footer {
+            position: relative;
+            z-index: 1;
+            padding: 10px;
+            background-color: rgba(210, 200, 200, 0.8);
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+    </style>
+{% endblock %}
+
+{# IMPORTANT: Override body_content to remove the dashboard structure #}
+{% block body_content %}
+<div class="main-content-wrapper"> {# This div now handles the centering and scrolling for the form #}
+    <div class="container-fluid"> {# Removed h-100 here, as main-content-wrapper manages height/centering #}
+        <div class="row justify-content-center"> {# Removed h-100 and align-items-center here #}
+            <div class="col-md-6 col-lg-4 mb-5">
+                <div class="card transparent-card">
+                    <div class="card-header bg-success text-white text-center py-3 shadow-sm">
+                        <h3 class="mb-0 fw-semibold">
+                            <i class="bi bi-person-plus-fill me-2"></i>
+                            Register New Account
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            {# Loop through form fields and apply form-control class using widget_tweaks #}
+                            {% for field in form %}
+                                <div class="mb-3">
+                                    {{ field.label_tag }}
+                                    {{ field|add_class:"form-control" }} {# <--- Make sure this is applied! #}
+                                    {% if field.help_text %}
+                                        <small class="form-text text-muted">{{ field.help_text }}</small>
+                                    {% endif %}
+                                    {% for error in field.errors %}
+                                        <div class="alert alert-danger mt-1">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+                            <button type="submit" class="btn btn-success w-100 d-flex align-items-center justify-content-center">
+                                <i class="bi bi-person-plus-fill me-2"></i>
+                                Register
+                            </button>
+                        </form>
+                        <p class="mt-3 text-center text-muted">
+                            <i class="bi bi-person-check me-1"></i>
+                            Already have an account?
+                            <a href="{% url 'login' %}" class="fw-semibold text-decoration-none text-primary">
+                                Login here
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock body_content %}

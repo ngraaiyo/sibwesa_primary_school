@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Result Slip - {{ student.get_full_name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            padding: 30px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h2, .header h3 {
+            margin: 0;
+        }
+
+        .info, .summary {
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            border: 1px solid #444;
+            padding: 6px;
+            text-align: center;
+        }
+
+        .footer {
+            margin-top: 40px;
+        }
+
+        .footer div {
+            margin-bottom: 20px;
+        }
+
+        @page {
+        margin: 20mm;
+        @bottom-center {
+            content: "Sibwesa Primary School | © {% now 'Y' %} | Page " counter(page) " of " counter(pages);
+            font-size: 10px;
+            color: #555;
+        }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Sibwesa Primary School</h2>
+        <h3>Result Slip</h3>
+        <p><strong>{{ examination.name }} - {{ examination.get_term_display }} {{ examination.academic_year }}</strong></p>
+    </div>
+
+    <div class="info">
+        <p><strong>Student Name:</strong> {{ student.get_full_name }}</p>
+        <p><strong>Admission No:</strong> {{ student.admission_number }}</p>
+        <p><strong>Class:</strong> {{ student.current_class.name }} ({{ student.current_class.year }})</p>
+    </div>
+
+    <div class="summary">
+        <p><strong>Overall Position:</strong> {{ student_result.position|default:"-" }}</p>
+        <p><strong>Total Score:</strong> {{ student_result.total_score }}</p>
+        <p><strong>Average Score:</strong> {{ student_result.average_score|floatformat:2 }}</p>
+        <p><strong>Overall Grade:</strong> {{ student_result.overall_grade }}</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Score</th>
+                <th>Grade</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for detail in student_result.subject_details %}
+            <tr>
+                <td style="text-align: left;">{{ detail.subject_name }}</td>
+                <td>{{ detail.score }}</td>
+                <td>{{ detail.grade }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <div><strong>Class Teacher:</strong> {{ student_result.class_teacher.get_full_name|default:"N/A" }}</div>
+        <div><strong>Class Teacher's Comment:</strong> __________________________________________</div>
+        <div><strong>Head Teacher:</strong> {{ student_result.head_teacher.get_full_name|default:"N/A" }}</div>
+        <div><strong>Head Teacher's Comment:</strong> __________________________________________</div>
+    </div>
+</body>
+</html>
