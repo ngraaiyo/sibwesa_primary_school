@@ -3,6 +3,7 @@
 from django.db import models
 from users.models import CustomUser
 from django.contrib.auth.models import User
+from datetime import date
 
 User.add_to_class('is_head_teacher', models.BooleanField(default=False))
 
@@ -28,7 +29,7 @@ class Class(models.Model):
         unique_together = ('name', 'year')
 
 class Student(models.Model):
-    admission_number = models.CharField(max_length=20, unique=True)
+    prem_number = models.CharField(max_length=20, unique=True)
     first_name = models.CharField(max_length=100)
     middle_name = models.CharField(max_length=100, blank=True, null=True) # <<< ADDED THIS LINE
     last_name = models.CharField(max_length=100)
@@ -39,7 +40,6 @@ class Student(models.Model):
         ('O', 'Other'),
     )
     gender = models.CharField(max_length=1, choices=gender_choices)
-    admission_number = models.CharField(max_length=50, unique=True)
     
     STATUS_CHOICES = [
         ('Active', 'Active'),
@@ -59,14 +59,18 @@ class Student(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='students'
+        related_name='students',
     )
+
+    graduation_year = models.IntegerField(null=True, blank=True)
+
+    has_attempted_exam = models.BooleanField(default=False)
 
     def __str__(self):
         # Update the string representation to include middle name if it exists
         if self.middle_name:
-            return f"{self.first_name} {self.middle_name} {self.last_name} ({self.admission_number})"
-        return f"{self.first_name} {self.last_name} ({self.admission_number})"
+            return f"{self.first_name} {self.middle_name} {self.last_name} ({self.prem_number})"
+        return f"{self.first_name} {self.last_name} ({self.prem_number})"
     
     def get_full_name(self):
         """
@@ -78,6 +82,11 @@ class Student(models.Model):
         full_name_parts.append(self.last_name)
         return " ".join(filter(None, full_name_parts)).strip() # .strip() to remove any leading/trailing spaces
 
+    def save(self, *args, **kwargs):
+        # If student is set to Graduated but graduation_year is not filled
+        if self.status == 'Graduated' and not self.graduation_year:
+            self.graduation_year = date.today().year
+        super().save(*args, **kwargs)
 
     class Meta:
         ordering = ['current_class__name', 'first_name', 'last_name']
@@ -123,7 +132,6 @@ class Examination(models.Model):
     class Meta:
         unique_together = ('name', 'academic_year', 'term')
         ordering = ['-academic_year', 'term', 'date', 'name']
-
 class Mark(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)

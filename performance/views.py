@@ -79,8 +79,6 @@ class PerformanceAnalysisView(LoginRequiredMixin, UserPassesTestMixin, View):
             'page_heading': 'Whole School Performance Analysis'
         }
         return render(request, self.template_name, context)
-
-
 class OverallSchoolPerformanceView(LoginRequiredMixin, UserPassesTestMixin, View):
     template_name = 'performance/overall_school_performance.html' # New template
     passing_score_threshold = 41 # Define your school's passing score threshold here

@@ -18,6 +18,9 @@ from .forms import ( StudentForm,
 
 from django import forms
 import datetime
+from django.db import transaction
+from django.template.loader import get_template
+from xhtml2pdf import pisa
 from datetime import date
 from .forms import StudentExcelUploadForm
 from django.urls import reverse
@@ -306,7 +309,7 @@ def student_upload_excel(request):
                 'last name': 'last_name',
                 'date of birth': 'date_of_birth',
                 'gender': 'gender',
-                'admission number': 'admission_number',
+                'prem number': 'prem_number',
                 'class name': 'current_class_name', # We'll map this to actual Class object
                 'class year': 'current_class_year', # Used with class name
             }
@@ -317,7 +320,7 @@ def student_upload_excel(request):
                 if h and str(h).strip().lower() in expected_headers:
                     header_map[expected_headers[str(h).strip().lower()]] = col_idx
 
-            required_headers = ['first_name', 'last_name', 'date_of_birth', 'gender', 'admission_number', 'current_class_name', 'current_class_year']
+            required_headers = ['first_name', 'last_name', 'date_of_birth', 'gender', 'prem_number', 'current_class_name', 'current_class_year']
             if not all(rh in header_map for rh in required_headers):
                 missing_headers = [h.replace('_', ' ').title() for h in required_headers if h not in header_map]
                 messages.error(request, f"Missing required headers in Excel: {', '.join(missing_headers)}")
@@ -336,7 +339,7 @@ def student_upload_excel(request):
                     last_name = row_data.get('last_name')
                     date_of_birth_raw = row_data.get('date_of_birth') # Get raw value
                     gender = str(row_data.get('gender')).strip().upper()
-                    admission_number = str(row_data.get('admission_number')).strip()
+                    prem_number = str(row_data.get('prem_number')).strip()
                     class_name = str(row_data.get('current_class_name')).strip()
 
                     # Handle class_year potentially being None or non-integer
@@ -351,8 +354,8 @@ def student_upload_excel(request):
                             continue # Skip this row
 
                     # Basic validation for non-date fields
-                    if not all([first_name, last_name, gender, admission_number, class_name, class_year is not None]):
-                        errors.append(f"Row {row_idx}: Missing required data (first name, last name, gender, admission number, class name, or class year).")
+                    if not all([first_name, last_name, gender, prem_number, class_name, class_year is not None]):
+                        errors.append(f"Row {row_idx}: Missing required data (first name, last name, gender, prem number, class name, or class year).")
                         continue
 
                     # --- START NEW ROBUST DATE PARSING LOGIC ---
@@ -406,7 +409,7 @@ def student_upload_excel(request):
                         continue
 
                     student, created = Student.objects.update_or_create(
-                        admission_number=admission_number,
+                        prem_number=prem_number,
                         defaults={
                             'first_name': first_name,
                             'middle_name': middle_name if middle_name else None,
@@ -879,7 +882,7 @@ def mark_excel_upload(request):
                 print(f"\n--- DEBUG START ---")
                 print(f"--- DEBUG: Raw headers from Excel: {header} ---")
 
-                _initial_required_headers = ['Admission_Number', 'First_Name', 'Middle_Name', 'Last_Name', 'Subject_Code', 'Score']
+                _initial_required_headers = ['Prem_Number', 'First_Name', 'Middle_Name', 'Last_Name', 'Subject_Code', 'Score']
                 required_headers_normalized = {h.replace(' ', '_').lower() for h in _initial_required_headers}
                 normalized_header = {h.replace(' ', '_').lower() for h in header if h}
 
@@ -895,7 +898,7 @@ def mark_excel_upload(request):
 
                 # Now, when getting column indices, use the lowercase/underscored names:
                 header_map = {h.replace(' ', '_').lower(): i for i, h in enumerate(header) if h}
-                admission_col = header_map.get('admission_number')
+                prem_col = header_map.get('prem_number')
                 first_name_col = header_map.get('first_name')
                 middle_name_col = header_map.get('middle_name')
                 last_name_col = header_map.get('last_name')
@@ -903,7 +906,7 @@ def mark_excel_upload(request):
                 score_col = header_map.get('score')
 
                 # Ensure all columns are found before proceeding with row processing (redundant check, but good for clarity)
-                if any(col is None for col in [admission_col, first_name_col, middle_name_col, last_name_col, subject_col, score_col]):
+                if any(col is None for col in [prem_col, first_name_col, middle_name_col, last_name_col, subject_col, score_col]):
                     messages.error(request, "One or more required columns were not found in the Excel file.")
                     return render(request, 'students/mark_excel_upload.html', {'form': form, 'examination': examination})
 
@@ -925,7 +928,7 @@ def mark_excel_upload(request):
                         skipped_count += 1
                         continue
 
-                    admission_number = str(row[admission_col].value).strip() if row[admission_col].value is not None else ''
+                    prem_number = str(row[prem_col].value).strip() if row[prem_col].value is not None else ''
                     excel_first_name = str(row[first_name_col].value).strip() if row[first_name_col].value is not None else ''
                     excel_middle_name = str(row[middle_name_col].value).strip() if row[middle_name_col].value is not None else ''
                     excel_last_name = str(row[last_name_col].value).strip() if row[last_name_col].value is not None else ''
@@ -933,27 +936,27 @@ def mark_excel_upload(request):
                     score_value = row[score_col].value
 
                     # --- START: Debugging raw and cleaned values ---
-                    print(f"  Raw values: Adm='{row[admission_col].value}', Sub='{row[subject_col].value}', Score='{row[score_col].value}'")
-                    print(f"  Cleaned values: Admission='{admission_number}', Subject='{subject_code}', Score='{score_value}'")
+                    print(f"  Raw values: Adm='{row[prem_col].value}', Sub='{row[subject_col].value}', Score='{row[score_col].value}'")
+                    print(f"  Cleaned values: Prem='{prem_number}', Subject='{subject_code}', Score='{score_value}'")
                     # --- END: Debugging raw and cleaned values ---
 
-                    if not admission_number or not subject_code:
-                        errors.append(f"Row {row_idx}: Admission Number or Subject Code is empty. Skipping row.")
+                    if not prem_col_number or not subject_code:
+                        errors.append(f"Row {row_idx}: Prem Number or Subject Code is empty. Skipping row.")
                         skipped_count += 1
-                        print(f"  SKIPPED: Row {row_idx} - Missing Admission or Subject Code.") # Debug
+                        print(f"  SKIPPED: Row {row_idx} - Missing Prem or Subject Code.") # Debug
                         continue
 
                     student = None
                     try:
-                        student = Student.objects.get(admission_number=admission_number)
+                        student = Student.objects.get(prem_number=prem_number)
                         print(f"  SUCCESS: Row {row_idx} - Student found: ID={student.id}, Name={student.first_name} {student.last_name}, Class={student.current_class.name}") # Debug
                     except Student.DoesNotExist:
-                        errors.append(f"Row {row_idx}: Student with admission number '{admission_number}' not found.")
+                        errors.append(f"Row {row_idx}: Student with prem number '{prem_number}' not found.")
                         skipped_count += 1
-                        print(f"  ERROR: Row {row_idx} - Student not found for Admission Number: {admission_number}") # Debug
+                        print(f"  ERROR: Row {row_idx} - Student not found for prem Number: {prem_number}") # Debug
                         continue
                     except Exception as e: # Catch any other unexpected student lookup errors
-                        errors.append(f"Row {row_idx}: Unexpected error finding student '{admission_number}': {e}")
+                        errors.append(f"Row {row_idx}: Unexpected error finding student '{prem_number}': {e}")
                         skipped_count += 1
                         print(f"  CRITICAL ERROR: Row {row_idx} - Unexpected error finding student: {e}") # Debug
                         continue
@@ -981,13 +984,13 @@ def mark_excel_upload(request):
                         
                         score = int(score_value)
                         if not (0 <= score <= 100):
-                            errors.append(f"Row {row_idx}: Score for {admission_number} ({subject_code}) must be between 0 and 100. Found: {score_value}.")
+                            errors.append(f"Row {row_idx}: Score for {prem_number} ({subject_code}) must be between 0 and 100. Found: {score_value}.")
                             skipped_count += 1
                             print(f"  ERROR: Row {row_idx} - Invalid score range: {score_value}") # Debug
                             continue
                         print(f"  SUCCESS: Row {row_idx} - Score parsed successfully: {score}") # Debug
                     except (ValueError, TypeError) as e:
-                        errors.append(f"Row {row_idx}: Invalid score value for {admission_number} ({subject_code}). Found: '{score_value}'. Score must be a number (Error: {e}).")
+                        errors.append(f"Row {row_idx}: Invalid score value for {prem_number} ({subject_code}). Found: '{score_value}'. Score must be a number (Error: {e}).")
                         skipped_count += 1
                         print(f"  ERROR: Row {row_idx} - Invalid score type/value: {score_value} (Error: {e})") # Debug
                         continue
@@ -1006,10 +1009,10 @@ def mark_excel_upload(request):
                             defaults={'score': score}
                         )
                         processed_count += 1
-                        print(f"  SUCCESS: Row {row_idx} - Mark {'created' if created else 'updated'}: Student={student.admission_number}, Subject={subject.code}, Score={score}") # Debug
+                        print(f"  SUCCESS: Row {row_idx} - Mark {'created' if created else 'updated'}: Student={student.prem_number}, Subject={subject.code}, Score={score}") # Debug
 
                     except Exception as e:
-                        errors.append(f"Row {row_idx}: An error occurred while saving mark for {admission_number} ({subject_code}): {e}")
+                        errors.append(f"Row {row_idx}: An error occurred while saving mark for {prem_number} ({subject_code}): {e}")
                         skipped_count += 1
                         print(f"  CRITICAL ERROR: Row {row_idx} - Failed to save mark: {e}") # Debug
                         continue
@@ -1258,7 +1261,7 @@ def add_student(request):
         form = StudentCreationForm(request.POST, user=request.user)
         if form.is_valid():
             student = form.save()
-            messages.success(request, f"Student '{student.get_full_name}' (Admission No: {student.admission_number}) added successfully.")
+            messages.success(request, f"Student '{student.get_full_name}' (Prem No: {student.prem_number}) added successfully.")
             return redirect('student_list') 
         else:
             for field, errors in form.errors.items():
@@ -1292,7 +1295,7 @@ def edit_student(request, pk):
         form = StudentCreationForm(request.POST, instance=student, user=request.user)
         if form.is_valid():
             student = form.save()
-            messages.success(request, f"Student '{student.get_full_name}' (Admission No: {student.admission_number}) updated successfully.")
+            messages.success(request, f"Student '{student.get_full_name}' (Prem No: {student.prem_number}) updated successfully.")
             return redirect('student_list')
         else:
             for field, errors in form.errors.items():
@@ -1324,11 +1327,11 @@ def process_student_excel_row(row_data, request):
         last_name = row_data.get('last_name')
         date_of_birth = row_data.get('date_of_birth')
         gender = row_data.get('gender')
-        admission_number = row_data.get('admission_number')
+        prem_number = row_data.get('prem_number')
         current_class_name = row_data.get('current_class_name')
 
-        if not all([first_name, last_name, admission_number, current_class_name]):
-            raise ValueError("Missing essential data (first name, last name, admission number, class name).")
+        if not all([first_name, last_name, prem_number, current_class_name]):
+            raise ValueError("Missing essential data (first name, last name, prem number, class name).")
 
         try:
             # Now 'Class' is defined because it's imported at the top
@@ -1338,7 +1341,7 @@ def process_student_excel_row(row_data, request):
 
         # Now 'Student' is defined because it's imported at the top
         student, created = Student.objects.update_or_create(
-            admission_number=admission_number,
+            prem_number=prem_number,
             defaults={
                 'first_name': first_name,
                 'middle_name': middle_name,
@@ -1515,13 +1518,13 @@ def all_students_view(request):
         students = students.filter(status=selected_status)
         # You might want to append to page_title based on status too, e.g., " (Active)"
 
-    # Search by Name or Admission Number
+    # Search by Name or Prem Number
     if search_query:
         students = students.filter(
             Q(first_name__icontains=search_query) |
             Q(middle_name__icontains=search_query) | # <--- MIDDLE NAME ADDED HERE
             Q(last_name__icontains=search_query) |
-            Q(admission_number__icontains=search_query)
+            Q(prem_number__icontains=search_query)
         )
         page_title = f"Students matching '{search_query}'"
 
@@ -1652,29 +1655,34 @@ def class_performance_analysis_view(request, class_id, exam_id):
     class_obj = get_object_or_404(Class, pk=class_id)
     examination = get_object_or_404(Examination, pk=exam_id)
 
-    # 1. Get all students in this class for this examination
-    students_in_class_for_exam = Student.objects.filter(current_class=class_obj).distinct()
-    total_students_in_class = students_in_class_for_exam.count()
+    # Get students who attempted the exam (i.e., have at least one non-null mark)
+    students_attempted = Student.objects.filter(
+        current_class=class_obj,
+        mark__examination=examination,
+        mark__score__isnull=False
+    ).distinct()
+    total_students_attempted = students_attempted.count()
 
     class_results = []
-    for student in students_in_class_for_exam:
+    for student in students_attempted:
         marks = Mark.objects.filter(student=student, examination=examination)
-        if marks.exists():
-            total_score = sum(mark.score for mark in marks if mark.score is not None)
-            num_subjects_scored = sum(1 for mark in marks if mark.score is not None)
-            average_score = total_score / num_subjects_scored if num_subjects_scored > 0 else 0
-            overall_grade = get_grade_from_score(average_score)
+        total_score = sum(mark.score for mark in marks if mark.score is not None)
+        subjects_scored = sum(1 for mark in marks if mark.score is not None)
+        average_score = total_score / subjects_scored if subjects_scored > 0 else 0
+        overall_grade = get_grade_from_score(average_score)
+        
+        class_results.append({
+            'student': student,
+            'total_score': total_score,
+            'average_score': round(average_score, 2),
+            'overall_grade': overall_grade,
+            'is_pass': is_passing_grade(overall_grade)
+        })
 
-            class_results.append({
-                'student': student,
-                'total_score': total_score,
-                'average_score': round(average_score, 2),
-                'overall_grade': overall_grade,
-                'is_pass': is_passing_grade(overall_grade)
-            })
-
+    # Sort by total score descending
     class_results.sort(key=lambda x: x['total_score'], reverse=True)
 
+    # Assign position (handling ties)
     current_position = 1
     previous_score = None
     for i, result in enumerate(class_results):
@@ -1685,74 +1693,84 @@ def class_performance_analysis_view(request, class_id, exam_id):
 
     top_students = class_results[:10]
 
-    overall_grade_distribution = {}
-    for grade_char in ['A', 'B', 'C', 'D', 'E', 'F', 'N/A']:
-        overall_grade_distribution[grade_char] = 0
+    # Get the top 10 failing students
+    bottom_students = class_results[-10:]
 
+    
+    # Grade distribution and pass/fail count
+    grade_keys = ['A', 'B', 'C', 'D', 'E', 'F', 'N/A']
+    overall_grade_distribution = {grade: 0 for grade in grade_keys}
     overall_pass_count = 0
     overall_fail_count = 0
 
     for result in class_results:
-        overall_grade_distribution[result['overall_grade']] = overall_grade_distribution.get(result['overall_grade'], 0) + 1
+        grade = result['overall_grade']
+        if grade not in overall_grade_distribution:
+            grade = 'N/A'
+        overall_grade_distribution[grade] += 1
+
         if result['is_pass']:
             overall_pass_count += 1
         else:
             overall_fail_count += 1
 
-    overall_pass_rate = (overall_pass_count / total_students_in_class) * 100 if total_students_in_class > 0 else 0
-    overall_fail_rate = (overall_fail_count / total_students_in_class) * 100 if total_students_in_class > 0 else 0  
-    
-    subject_analysis = []
-    all_subjects = class_obj.subjects.all().order_by('name')
+    # Calculate pass/fail rates
+    overall_pass_rate = (overall_pass_count / total_students_attempted) * 100 if total_students_attempted > 0 else 0
+    overall_fail_rate = (overall_fail_count / total_students_attempted) * 100 if total_students_attempted > 0 else 0
 
-    for subject in all_subjects:
+    # Subject analysis
+    subject_analysis = []
+    subjects = class_obj.subjects.all().order_by('name')
+    
+    for subject in subjects:
         subject_data = {
             'name': subject.name,
             'code': subject.code,
             'total_scored': 0,
-            'grades': {'A': 0, 'B': 0, 'C': 0, 'D': 0, 'E': 0, 'F': 0},
+            'grades': {g: 0 for g in ['A', 'B', 'C', 'D', 'E', 'F']},
             'pass_count': 0,
             'fail_count': 0,
         }
 
-        marks_for_subject = Mark.objects.filter(
+        subject_marks = Mark.objects.filter(
             examination=examination,
             subject=subject,
-            student__current_class=class_obj
+            student__current_class=class_obj,
+            score__isnull=False
         ).select_related('student')
 
-        for mark in marks_for_subject:
-            if mark.score is not None:
-                subject_data['total_scored'] += 1
-                grade = get_grade_from_score(mark.score)
-                subject_data['grades'][grade] = subject_data['grades'].get(grade, 0) + 1
-                if is_passing_grade(grade):
-                    subject_data['pass_count'] += 1
-                else:
-                    subject_data['fail_count'] += 1
-                    
+        for mark in subject_marks:
+            grade = get_grade_from_score(mark.score)
+            subject_data['total_scored'] += 1
+            if grade in subject_data['grades']:
+                subject_data['grades'][grade] += 1
+            if is_passing_grade(grade):
+                subject_data['pass_count'] += 1
+            else:
+                subject_data['fail_count'] += 1
+
         if subject_data['total_scored'] > 0:
             subject_data['pass_percentage'] = (subject_data['pass_count'] / subject_data['total_scored']) * 100
             subject_data['fail_percentage'] = (subject_data['fail_count'] / subject_data['total_scored']) * 100
         else:
-            subject_data['pass_percentage'] = 0 # Ensure 0 if no students scored
-            subject_data['fail_percentage'] = 0 # Ensure 0 if no students scored
-        
+            subject_data['pass_percentage'] = 0
+            subject_data['fail_percentage'] = 0
+
         subject_analysis.append(subject_data)
 
     context = {
         'examination': examination,
         'class_obj': class_obj,
-        'total_students_in_class': total_students_in_class,
+        'total_students_attempted': total_students_attempted,
         'overall_grade_distribution': overall_grade_distribution,
         'overall_pass_count': overall_pass_count,
         'overall_fail_count': overall_fail_count,
-        'overall_pass_rate': overall_pass_rate,
-        'overall_fail_rate': round(overall_fail_rate, 2),
         'overall_pass_rate': round(overall_pass_rate, 2),
+        'overall_fail_rate': round(overall_fail_rate, 2),
         'subject_analysis': subject_analysis,
         'top_students': top_students,
-        'page_title': f'Class Performance - {class_obj.name}'
+        'bottom_students': bottom_students,
+        'page_title': f'Class Performance - {class_obj.name}',
     }
     return render(request, 'students/class_performance_analysis.html', context)
 
@@ -1796,7 +1814,6 @@ def student_result_slip_view(request, student_id, examination_id):
         'student_result': student_result,
     }
     return render(request, 'students/student_result_slip.html', context)
-
 class AdminRequiredMixin(UserPassesTestMixin):
     def test_func(self):
         return self.request.user.is_staff
@@ -1879,7 +1896,7 @@ def download_class_summary_pdf(request, exam_id, class_id):
     # ... (your data retrieval and calculation logic remains the same) ...
     # This part of the code is unchanged from my last response
     all_subjects = Subject.objects.filter(classes_assigned=class_obj).order_by('code')
-    students_in_class = Student.objects.filter(current_class=class_obj).order_by('admission_number')
+    students_in_class = Student.objects.filter(current_class=class_obj).order_by('prem_number')
     
     results = []
     
@@ -1982,3 +1999,185 @@ def view_student_result_slip(request, exam_id, student_id):
         'student_result': student_result,
     }
     return render(request, 'students/result_slip.html', context)
+
+@login_required
+def class_analysis_pdf(request, exam_id, class_id):
+    examination = get_object_or_404(Examination, pk=exam_id)
+    class_obj = get_object_or_404(Class, pk=class_id)
+
+    # Reuse the logic from your main view:
+    students_attempted = Student.objects.filter(
+        current_class=class_obj,
+        mark__examination=examination,
+        mark__score__isnull=False
+    ).distinct()
+
+    class_results = []
+    for student in students_attempted:
+        marks = Mark.objects.filter(student=student, examination=examination)
+        total_score = sum(mark.score for mark in marks if mark.score is not None)
+        subjects_scored = sum(1 for mark in marks if mark.score is not None)
+        average_score = total_score / subjects_scored if subjects_scored > 0 else 0
+        overall_grade = get_grade_from_score(average_score)
+
+        class_results.append({
+            'student': student,
+            'total_score': total_score,
+            'average_score': round(average_score, 2),
+            'overall_grade': overall_grade,
+            'is_pass': is_passing_grade(overall_grade)
+        })
+
+    overall_grade_distribution = {grade: 0 for grade in ['A', 'B', 'C', 'D', 'E', 'F', 'N/A']}
+    overall_pass_count = 0
+    overall_fail_count = 0
+
+    for result in class_results:
+        grade = result['overall_grade']
+        if grade not in overall_grade_distribution:
+            grade = 'N/A'
+        overall_grade_distribution[grade] += 1
+        if result['is_pass']:
+            overall_pass_count += 1
+        else:
+            overall_fail_count += 1
+
+    total_students = len(class_results)
+    overall_pass_rate = (overall_pass_count / total_students) * 100 if total_students > 0 else 0
+    overall_fail_rate = (overall_fail_count / total_students) * 100 if total_students > 0 else 0
+
+    # Subject analysis (same as your main view)
+    subject_analysis = []
+    subjects = class_obj.subjects.all().order_by('name')
+    for subject in subjects:
+        subject_data = {
+            'name': subject.name,
+            'code': subject.code,
+            'total_scored': 0,
+            'grades': {g: 0 for g in ['A', 'B', 'C', 'D', 'E', 'F']},
+            'pass_count': 0,
+            'fail_count': 0,
+        }
+        marks_for_subject = Mark.objects.filter(
+            examination=examination,
+            subject=subject,
+            student__current_class=class_obj,
+            score__isnull=False
+        ).select_related('student')
+
+        for mark in marks_for_subject:
+            grade = get_grade_from_score(mark.score)
+            subject_data['total_scored'] += 1
+            if grade in subject_data['grades']:
+                subject_data['grades'][grade] += 1
+            if is_passing_grade(grade):
+                subject_data['pass_count'] += 1
+            else:
+                subject_data['fail_count'] += 1
+
+        if subject_data['total_scored'] > 0:
+            subject_data['pass_percentage'] = (subject_data['pass_count'] / subject_data['total_scored']) * 100
+            subject_data['fail_percentage'] = (subject_data['fail_count'] / subject_data['total_scored']) * 100
+        else:
+            subject_data['pass_percentage'] = 0
+            subject_data['fail_percentage'] = 0
+        subject_analysis.append(subject_data)
+
+    # Top students
+    class_results.sort(key=lambda x: x['total_score'], reverse=True)
+    top_students = class_results[:10]
+   
+    # Format top students for PDF
+    top_students_for_pdf = [{
+        'name': f"{r['student'].first_name} {r['student'].last_name}",
+        'average': r['average_score'],
+        'grade': r['overall_grade']
+    } for r in top_students]
+
+    bottom_students = sorted(class_results, key=lambda x: x['total_score'])[:10]
+
+    bottom_students_for_pdf = [{
+        #'position_from_bottom': idx + 1,
+        'name': f"{r['student'].first_name} {r['student'].last_name}",
+        'average': r['average_score'],
+        'grade': r['overall_grade']
+    } for r in bottom_students]
+
+    context = {
+        'examination': examination,
+        'class_obj': class_obj,
+        'overall_grade_distribution': overall_grade_distribution,
+        'subject_performance': subject_analysis,
+        'top_students': top_students_for_pdf,
+        'bottom_students':bottom_students_for_pdf,
+        'overall_pass_count': overall_pass_count,
+        'overall_fail_count': overall_fail_count,
+        'overall_pass_rate': round(overall_pass_rate, 2),
+        'overall_fail_rate': round(overall_fail_rate, 2),
+    }
+
+    template_path = 'students/class_analysis_pdf_template.html'
+    template = get_template(template_path)
+    html = template.render(context)
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'filename="Class_Performance_Report_{class_obj.name}_{examination.academic_year}.pdf"'
+
+    HTML(string=html).write_pdf(response)
+
+    return response
+
+@login_required
+@user_passes_test(is_admin_or_headteacher_or_statistic_teacher, login_url='/users/login/') 
+def student_promotion_and_graduation(request):
+    classes = Class.objects.all().order_by('year', 'name')
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        if action == 'promote':
+            current_class_id = request.POST.get('current_class')
+            next_class_id = request.POST.get('next_class')
+
+            if not current_class_id or not next_class_id:
+                messages.error(request, "Please select both a current and a next class.")
+                return redirect('student_promotion_and_graduation')
+
+            current_class = Class.objects.get(pk=current_class_id)
+            next_class = Class.objects.get(pk=next_class_id)
+            
+            with transaction.atomic():
+                students_to_promote = Student.objects.filter(current_class=current_class)
+                
+                # Check for an empty class to avoid unnecessary operations
+                if not students_to_promote:
+                    messages.info(request, f"No students found in {current_class.name} to promote.")
+                    return redirect('student_promotion_and_graduation')
+
+                students_to_promote.update(current_class=next_class)
+            
+            messages.success(request, f"Successfully promoted {len(students_to_promote)} students from {current_class.name} to {next_class.name}.")
+            
+        elif action == 'graduate':
+            final_class_id = request.POST.get('final_class')
+
+            if not final_class_id:
+                messages.error(request, "Please select the final class to graduate.")
+                return redirect('student_promotion_and_graduation')
+            
+            final_class = Class.objects.get(pk=final_class_id)
+            
+            with transaction.atomic():
+                students_to_graduate = Student.objects.filter(current_class=final_class)
+
+                if not students_to_graduate:
+                    messages.info(request, f"No students found in {final_class.name} to graduate.")
+                    return redirect('student_promotion_and_graduation')
+
+                # Use the status field to mark as graduated
+                students_to_graduate.update(status='Graduated', current_class=None)
+
+            messages.success(request, f"Successfully graduated {len(students_to_graduate)} students from {final_class.name}.")
+            
+    return render(request, 'students/student_promotion_graduation.html', {'classes': classes})
+

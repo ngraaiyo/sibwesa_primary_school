@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Mark Entry - Sibwesa Primary School{% endblock %}
+{% block title %}Mark Entry - Kabage Primary School{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -107,7 +107,7 @@
             <thead class="table-dark">
                 <tr>
                     <th>#</th>
-                    <th><i class="bi bi-hash"></i> Admission No.</th>
+                    <th><i class="bi bi-hash"></i> Prem No.</th>
                     <th><i class="bi bi-person"></i> Student Name</th>
                     <th><i class="bi bi-clipboard-check"></i> Score (0-100)</th>
                 </tr>
@@ -117,7 +117,7 @@
                 {% for form in formset %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td>{{ form.instance.student.admission_number }}</td>
+                    <td>{{ form.instance.student.prem_number }}</td>
                     <td>{{ form.instance.student.get_full_name }}</td>
                     <td>
                         {{ form.score }}

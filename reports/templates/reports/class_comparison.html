@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h2 class="mb-4 text-center display-6 fw-bold text-primary">
+        <i class="bi bi-bar-chart-fill me-2"></i> Class Comparison for {{ examination.name }}
+    </h2>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            {% if class_averages %}
+            <canvas id="classComparisonChart"></canvas>
+            {% else %}
+            <div class="alert alert-warning text-center">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> No data found for this examination.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('classComparisonChart');
+    const classAverages = JSON.parse('{{ class_averages|safe|escapejs }}');
+
+    const labels = classAverages.map(item => item.student__current_class__name);
+    const data = classAverages.map(item => item.class_average);
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Class Average Score',
+                data: data,
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -1,5 +1,6 @@
 {# users/templates/users/document_form.html #}
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block title %}{% if form.instance.pk %}Edit Document{% else %}Upload New Document{% endif %}{% endblock %}
 

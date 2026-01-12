@@ -1,19 +1,19 @@
 {% extends 'base.html' %}
 
-{% block title %}Result Slip - {{ student.get_full_name }} - Sibwesa Primary School{% endblock %}
+{% block title %}Result Slip - {{ student.get_full_name }} - KabagePrimary School{% endblock %}
 
 {% block content %}
 <div class="container-fluid mb-4 mt-4 print-area">
     <div class="card shadow-lg border-0">
         <div class="card-header bg-primary text-white text-center">
-            <h4 class="mb-0"><i class="bi bi-building"></i> Sibwesa Primary School</h4>
+            <h4 class="mb-0"><i class="bi bi-building"></i> Kabagerimary School</h4>
             <h5 class="mb-0"><i class="bi bi-journal-check"></i> Result Slip - {{ examination.name }} ({{ examination.get_term_display }} - {{ examination.academic_year }})</h5>
         </div>
         <div class="card-body">
             <div class="row mb-4">
                 <div class="col-md-6">
                     <p><i class="bi bi-person-circle"></i> <strong>Student Name:</strong> {{ student.get_full_name }}</p>
-                    <p><i class="bi bi-123"></i> <strong>Admission No.:</strong> {{ student.admission_number }}</p>
+                    <p><i class="bi bi-123"></i> <strong>Prem No.:</strong> {{ student.prem_number }}</p>
                     <p><i class="bi bi-easel2"></i> <strong>Class:</strong> {{ student.current_class.name }} (Standard {{ student.current_class.year }})</p>
                 </div>
                 <div class="col-md-6 text-md-end">

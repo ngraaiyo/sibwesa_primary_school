@@ -1,5 +1,6 @@
 {# users/templates/users/notification_form.html #}
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block title %}{% if form.instance.pk %}Edit Notification{% else %}Create Notification{% endif %}{% endblock %}
 

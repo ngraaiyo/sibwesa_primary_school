@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual Environment
+venv/
+.venv/
+
+# OS files
+Thumbs.db
+Desktop.ini
+
+# VS Code
+.vscode/

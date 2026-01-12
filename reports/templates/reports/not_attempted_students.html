@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Students Not Attempted Exam - {{ class_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <!-- Page Heading -->
+    <div class="d-flex align-items-center mb-4">
+        <i class="bi bi-person-x-fill text-danger fs-3 me-2"></i>
+        <h2 class="mb-0">Students Who Didn't Attempt Exam - {{ class_name }}</h2>
+    </div>
+
+    <!-- Card -->
+    <div class="card shadow-lg border-0 rounded-3">
+        <div class="card-body">
+            {% if students %}
+                <!-- Responsive Table -->
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col"><i class="bi bi-person-badge me-1"></i> Student Name</th>
+                                <th scope="col"><i class="bi bi-card-list me-1"></i> Prem No.</th>
+                                <th scope="col"><i class="bi bi-gender-ambiguous me-1"></i> Gender</th>
+                                <th scope="col"><i class="bi bi-exclamation-triangle-fill me-1"></i> Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in students %}
+                            <tr>
+                                <th scope="row">{{ forloop.counter }}</th>
+                                <td>
+                                    <i class="bi bi-person-circle text-primary me-2"></i>
+                                    {{ student.first_name }} {{ student.middle_name }} {{ student.last_name }}
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">
+                                        <i class="bi bi-upc-scan me-1"></i> {{ student.prem_number }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if student.get_gender_display == "Male" %}
+                                        <i class="bi bi-gender-male text-primary me-1"></i>
+                                    {% else %}
+                                        <i class="bi bi-gender-female text-danger me-1"></i>
+                                    {% endif %}
+                                    {{ student.get_gender_display }}
+                                </td>
+                                <td>
+                                    <span class="badge bg-danger">
+                                        <i class="bi bi-x-circle-fill me-1"></i> {{ student.status|title }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <!-- Success Alert -->
+                <div class="alert alert-success d-flex align-items-center" role="alert">
+                    <i class="bi bi-check-circle-fill fs-4 me-2"></i>
+                    <div>
+                        All students in <strong>{{ class_name }}</strong> have attempted the exam 🎉
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock content %}

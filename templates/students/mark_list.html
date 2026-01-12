@@ -2,7 +2,7 @@
 {% load static %}
 {% load widget_tweaks %} {# This line is correctly here, keep it! #}
 
-{% block title %}View Marks - Sibwesa Primary School{% endblock %}
+{% block title %}View Marks - Kabage Primary School{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -150,7 +150,7 @@
                                     <h6 class="mb-0"><i class="fas fa-user-circle me-2"></i>Student: {{ mark.student.get_full_name }}</h6>
                                 </div>
                                 <div class="card-body">
-                                    <p class="card-text"><strong>Admission No.:</strong> {{ mark.student.admission_number }}</p>
+                                    <p class="card-text"><strong>Prem No.:</strong> {{ mark.student.prem_number }}</p>
                                     <p class="card-text"><strong>Class:</strong> {{ mark.student.current_class.name }}</p>
                                     <p class="card-text"><strong>Examination:</strong> {{ mark.examination.name }}</p>
                                     <p class="card-text"><strong>Subject:</strong> {{ mark.subject.name }}</p>

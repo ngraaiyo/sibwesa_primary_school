@@ -2,25 +2,28 @@
 
 {% extends 'base.html' %}
 
-{% block title %}Class Performance Analysis - {{ class_obj.name }} - Sibwesa Primary School{% endblock %}
+{% block title %}Class Performance Analysis - {{ class_obj.name }} - Kabage Primary School{% endblock %}
 
 {% block content %}
 <div class="container my-5 p-4 border rounded shadow bg-white">
+     <h2 class="text-center text-primary mb-2">Kabage Primary School</h2>
     <h2 class="text-center text-primary mb-2">📊 Class Performance Analysis</h2>
     <p class="text-center mb-1">
-    <strong><i class="fas fa-file-alt me-1"></i>Examination:</strong>
-    {{ examination.name }} ({{ examination.get_term_display }} - {{ examination.academic_year }})
+        <strong><i class="fas fa-file-alt me-1"></i>Examination:</strong>
+        {{ examination.name }} ({{ examination.get_term_display }} - {{ examination.academic_year }})
     </p>
     <p class="text-center mb-4">
         <strong><i class="fas fa-school me-1"></i>Class:</strong>
         {{ class_obj.name }} ({{ class_obj.year }})
     </p>
+
     <div class="row g-4">
+        <!-- Grade Distribution -->
         <div class="col-md-6">
             <div class="card h-100 shadow-sm">
-               <div class="card-header bg-primary text-white">
-                <i class="fas fa-chart-bar me-1"></i> Overall Grade Distribution
-            </div>
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-chart-bar me-1"></i> Overall Grade Distribution
+                </div>
                 <div class="card-body">
                     <ul class="list-group list-group-flush">
                         {% for grade, count in overall_grade_distribution.items %}
@@ -34,9 +37,10 @@
             </div>
         </div>
 
+        <!-- Pass/Fail Summary -->
         <div class="col-md-6">
             <div class="card h-100 shadow-sm">
-               <div class="card-header bg-success text-white">
+                <div class="card-header bg-success text-white">
                     <i class="fas fa-balance-scale me-1"></i> Pass/Fail Summary
                 </div>
                 <div class="card-body">
@@ -52,8 +56,8 @@
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             📈 <strong>Pass Rate</strong>
                             <span class="badge bg-info rounded-pill">
-                                {% if total_students_in_class > 0 %}
-                                    {{ overall_pass_rate|floatformat:2 }}%
+                                {% if overall_pass_rate != None %}
+                                    {{ overall_pass_rate }}%
                                 {% else %}
                                     N/A
                                 {% endif %}
@@ -61,7 +65,13 @@
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             📉 <strong>Fail Rate</strong>
-                            <span class="badge bg-warning text-dark rounded-pill">{{ overall_fail_rate|floatformat:2 }}%</span>
+                            <span class="badge bg-warning text-dark rounded-pill">
+                                {% if overall_fail_rate != None %}
+                                    {{ overall_fail_rate }}%
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </span>
                         </li>
                     </ul>
                 </div>
@@ -71,6 +81,7 @@
 
     <hr class="my-4">
 
+    <!-- Subject-wise Analysis -->
     <h4 class="text-secondary fw-bold mb-3">📚 Subject-wise Performance</h4>
     <div class="table-responsive">
         <table class="table table-bordered table-striped table-hover text-center align-middle shadow-sm">
@@ -99,11 +110,13 @@
                     <td>{{ subject.grades.F }}</td>
                     <td class="bg-success text-white">{{ subject.pass_count }}</td>
                     <td class="bg-danger text-white">{{ subject.fail_count }}</td>
-                    <td class="bg-primary text-white"></tdclass> {{ subject.pass_percentage|floatformat:2 }}%</td>
+                    <td class="bg-primary text-white">{{ subject.pass_percentage|floatformat:2 }}%</td>
                     <td class="bg-danger text-white">{{ subject.fail_percentage|floatformat:2 }}%</td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="12">No subject performance data available.</td></tr>
+                <tr>
+                    <td colspan="12">No subject performance data available.</td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
@@ -111,13 +124,16 @@
 
     <hr class="my-4">
 
+    <!-- Top 10 Students -->
     <h4 class="text-secondary fw-bold mb-3">🏅 Top 10 Students</h4>
     {% if top_students %}
     <ul class="list-group mb-4 shadow-sm">
         {% for student_result in top_students %}
         <li class="list-group-item d-flex justify-content-between align-items-center">
             <span><strong>{{ student_result.position }}.</strong> {{ student_result.student.get_full_name }}</span>
-            <span class="badge bg-primary rounded-pill">Avg: {{ student_result.average_score }} | Grade: {{ student_result.overall_grade }}</span>
+            <span class="badge bg-primary rounded-pill">
+                Avg: {{ student_result.average_score }} | Grade: {{ student_result.overall_grade }}
+            </span>
         </li>
         {% endfor %}
     </ul>
@@ -125,13 +141,32 @@
     <div class="alert alert-info">No top students to display.</div>
     {% endif %}
 
+    <hr class="my-4">
+
+    <h4 class="text-secondary fw-bold mb-3">⛔ Last 10 Students</h4>
+    {% if bottom_students %}
+    <ul class="list-group mb-4 shadow-sm">
+        {% for student_result in bottom_students %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span><strong>{{ student_result.position }}.</strong> {{ student_result.student.get_full_name }}</span>
+            <span class="badge bg-danger rounded-pill">
+                Avg: {{ student_result.average_score }} | Grade: {{ student_result.overall_grade }}
+            </span>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="alert alert-info">No last 10 students to display.</div>
+    {% endif %}
+
+    <!-- Actions -->
     <div class="d-flex justify-content-end mt-4 gap-2">
         <a href="{% url 'performance_selection' %}" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left"></i> Back
         </a>
-        <button onclick="window.print()" class="btn btn-primary d-print-none">
-            <i class="fas fa-print"></i> Print
-        </button>
+        <a href="{% url 'class_analysis_pdf' exam_id=examination.pk class_id=class_obj.pk %}" class="btn btn-primary d-print-none" target="_blank">
+            <i class="fas fa-print"></i> Print Report
+        </a>
     </div>
 </div>
 {% endblock %}
@@ -140,7 +175,6 @@
 <style>
     h2, h4 { font-weight: 600; }
 
-    /* Table print tweaks */
     @media print {
         body > *:not(.container) { display: none !important; }
         .navbar, footer, .d-print-none { display: none !important; }

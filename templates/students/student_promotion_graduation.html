@@ -1,0 +1,107 @@
+{% extends 'base.html' %} 
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-center fw-bold">🎓 Student Management</h2>
+    
+    {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} shadow-sm" role="alert">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Promote Students Card -->
+    <div class="card shadow-lg border-0 mb-5">
+        <div class="card-header bg-success text-white fw-bold"><i class="bi bi-arrow-up-circle-fill"></i>
+            Promote Students
+        </div>
+        <div class="card-body">
+            <p class="text-muted">Select a class to promote its students to the next class.</p>
+            <form method="post" action="">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="promote">
+                <div class="row g-3">
+                    <div class="col-md-5">
+                        <label for="current_class" class="form-label">Current Class:</label>
+                        <select name="current_class" id="current_class" class="form-select shadow-sm">
+                            <option value="">-- Select a class --</option>
+                            {% for class in classes %}
+                            <option value="{{ class.id }}">{{ class.name }} ({{ class.year }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <label for="next_class" class="form-label">Next Class:</label>
+                        <select name="next_class" id="next_class" class="form-select shadow-sm">
+                            <option value="">-- Select a class --</option>
+                            {% for class in classes %}
+                            <option value="{{ class.id }}">{{ class.name }} ({{ class.year }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-success w-100 shadow-sm fw-bold">
+                            Promote
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Graduate Students Card -->
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-warning text-dark fw-bold"><i class="bi bi-award-fill"></i>
+            Graduate Students
+        </div>
+        <div class="card-body">
+            <p class="text-muted">Select the final class to graduate all students.</p>
+            <form method="post" action="">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="graduate">
+                <div class="row g-3">
+                    <div class="col-md-10">
+                        <label for="final_class" class="form-label">Final Class:</label>
+                        <select name="final_class" id="final_class" class="form-select shadow-sm">
+                            <option value="">-- Select a class --</option>
+                            {% for class in classes %}
+                            <option value="{{ class.id }}">{{ class.name }} ({{ class.year }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-warning w-100 shadow-sm fw-bold">
+                            Graduate
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Extra Styling -->
+<style>
+    h2 {
+        letter-spacing: 1px;
+    }
+    .card {
+        border-radius: 12px;
+    }
+    .form-select, .btn {
+        transition: all 0.2s ease-in-out;
+    }
+    .form-select:focus {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+    }
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+</style>
+{% endblock %}

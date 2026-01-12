@@ -46,7 +46,7 @@
         @page {
         margin: 20mm;
         @bottom-center {
-            content: "Sibwesa Primary School | © {% now 'Y' %} | Page " counter(page) " of " counter(pages);
+            content: "Kabage Primary School | © {% now 'Y' %} | Page " counter(page) " of " counter(pages);
             font-size: 10px;
             color: #555;
         }
@@ -55,14 +55,14 @@
 </head>
 <body>
     <div class="header">
-        <h2>Sibwesa Primary School</h2>
+        <h2>Kabage Primary School</h2>
         <h3>Result Slip</h3>
         <p><strong>{{ examination.name }} - {{ examination.get_term_display }} {{ examination.academic_year }}</strong></p>
     </div>
 
     <div class="info">
         <p><strong>Student Name:</strong> {{ student.get_full_name }}</p>
-        <p><strong>Admission No:</strong> {{ student.admission_number }}</p>
+        <p><strong>Prem No:</strong> {{ student.prem_number }}</p>
         <p><strong>Class:</strong> {{ student.current_class.name }} ({{ student.current_class.year }})</p>
     </div>
 

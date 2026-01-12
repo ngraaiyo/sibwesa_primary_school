@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Top and Bottom Students - {{ class_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h2 class="mb-4 text-center display-6 fw-bold text-primary">
+        <i class="bi bi-bar-chart-fill me-2"></i>
+        Top and Bottom Students - {{ class_name }}
+    </h2>
+
+    <!-- Print & PDF Buttons -->
+    <div class="d-flex justify-content-end mb-3">
+    {% if examination_id and class_id %}
+            <a href="{% url 'reports:top_bottom_pdf' class_id=class_id examination_id=examination_id %}" 
+                class="btn btn-primary me-2">
+                <i class="bi bi-printer-fill"></i> Print
+            </a>
+            <a href="{% url 'reports:top_bottom_pdf' class_id=class_id examination_id=examination_id %}" 
+                class="btn btn-success">
+                <i class="bi bi-file-earmark-pdf-fill"></i> Download PDF
+            </a>
+        {% else %}
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>Examination or Class not selected for PDF/Print.
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="row">
+
+        <!-- Top 10 Students -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-success">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-award-fill me-2"></i>Top 10 Students</h5>
+                    <span class="badge bg-light text-success">{{ top_students|length }}</span>
+                </div>
+                <div class="card-body p-2">
+                    {% if top_students %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered mb-0">
+                            <thead class="table-success text-center">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Name</th>
+                                    <th>Total Score</th>
+                                    <th>Average</th>
+                                    <th>Grade</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for s in top_students %}
+                                <tr class="align-middle">
+                                    <td class="text-center">{{ forloop.counter }}</td>
+                                    <td>{{ s.student.get_full_name }}</td>
+                                    <td class="text-center">{{ s.total_score }}</td>
+                                    <td class="text-center">{{ s.average|floatformat:2 }}</td>
+                                    <td class="text-center">{{ s.grade }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning m-2">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>No data found for this exam.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom 10 Students -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-danger">
+                <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-exclamation-circle-fill me-2"></i>Bottom 10 Students</h5>
+                    <span class="badge bg-light text-danger">{{ bottom_students|length }}</span>
+                </div>
+                <div class="card-body p-2">
+                    {% if bottom_students %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered mb-0">
+                            <thead class="table-danger text-center">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Name</th>
+                                    <th>Total Score</th>
+                                    <th>Average</th>
+                                    <th>Grade</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for s in bottom_students %}
+                                <tr class="align-middle">
+                                    <td class="text-center">{{ forloop.counter }}</td>
+                                    <td>{{ s.student.get_full_name }}</td>
+                                    <td class="text-center">{{ s.total_score }}</td>
+                                    <td class="text-center">{{ s.average|floatformat:2 }}</td>
+                                    <td class="text-center">{{ s.grade }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning m-2">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>No data found for this exam.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Optional custom styles -->
+<style>
+    .card-header h5 i {
+        vertical-align: middle;
+    }
+    table.table-hover tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+</style>
+{% endblock content %}

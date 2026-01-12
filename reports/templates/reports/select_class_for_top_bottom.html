@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}Select Class{% endblock %}
+
+{% block page_heading %}
+    <i class="bi bi-people-fill text-primary me-2"></i> {{ page_title }}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        {% for class in classes %}
+        <div class="col-12 mb-3">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="row g-0 align-items-center">
+                    <!-- Icon Column -->
+                    <div class="col-auto p-3 d-flex align-items-center justify-content-center bg-light rounded-start">
+                        <i class="bi bi-building-check text-primary fs-2"></i>
+                    </div>
+
+                    <!-- Class Info -->
+                    <div class="col">
+                        <div class="card-body">
+                            <h5 class="card-title mb-1 fw-bold">{{ class.name }}</h5>
+                            <p class="text-muted mb-0">Click below to view top and bottom students</p>
+                        </div>
+                    </div>
+
+                    <!-- Button -->
+                    <div class="col-auto pe-3">
+                        <a href="{% url 'reports:top_and_bottom_students' class_id=class.id examination_id=examination_id %}" 
+                           class="btn btn-outline-primary d-flex align-items-center">
+                            <i class="bi bi-bar-chart-line-fill me-2"></i> View Report
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-warning text-center">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> No classes found.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

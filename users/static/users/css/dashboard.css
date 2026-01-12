@@ -37,6 +37,17 @@ body {
     z-index: 1000; /* Ensure it's above other content if needed */
 }
 
+#sidebar-scroll-area {
+    flex-grow: 1; 
+    overflow-y: auto;
+    -ms-text-overflow: none;
+    scrollbar-width: none;
+}
+
+#sidebar-scroll-area::-webkit-scrollbar {
+    display: none; /* Hides scrollbar in WebKit browsers */
+}
+
 .sidebar-heading {
     display: flex;
     align-items: center;
@@ -305,4 +316,89 @@ body {
     height: 100%;
 }
 
+/* ===================================
+   BASE STYLES FOR SIDEBAR
+   =================================== */
 
+#sidebar-wrapper {
+    /* Define your default width */
+    min-width: 250px;
+    margin-left: -250px; /* Initially hidden off-screen */
+    -webkit-transition: margin .25s ease-out;
+    -moz-transition: margin .25s ease-out;
+    -o-transition: margin .25s ease-out;
+    transition: margin .25s ease-out;
+    background: #007bff; /* Example background */
+    z-index: 10;
+    /* Ensure the list links have visible text */
+    overflow-x: hidden; 
+}
+
+#wrapper.toggled #sidebar-wrapper {
+    margin-left: 0; /* Show sidebar when toggled (Default expanded state) */
+}
+
+/* Base styles for sidebar links */
+.sidebar-link {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ===================================
+   COLLAPSED SIDEBAR STYLES (Icons Only)
+   =================================== */
+
+#wrapper.toggled #sidebar-wrapper {
+    min-width: 65px !important;
+    width: 65px !important;
+    max-width: 65px !important;
+    overflow-x: visible;
+}
+
+#wrapper.toggled .sidebar-heading {
+    font-size: 0;
+    text-align: center;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+#wrapper.toggled .sidebar-heading img {
+    margin: 0 auto !important;
+    display: block;
+}
+
+#wrapper.toggled .sidebar-text {
+    display: none !important;
+}
+
+#wrapper.toggled .list-group-item {
+    justify-content: center !important;
+    padding: 1.2rem 0 !important; /* More vertical space for icon */
+    text-align: center;
+}
+
+#wrapper.toggled .list-group-item i {
+    font-size: 1.7rem !important; /* Make icons larger and clearer */
+    display: block;
+    margin: 0 auto;
+    color: #6c757d; /* Muted icon color, adjust as needed */
+}
+
+#wrapper.toggled .chevron-icon {
+    display: none !important;
+}
+
+#wrapper.toggled .collapse {
+    display: none !important;
+}
+
+/* Optional: On hover, highlight the icon background */
+#wrapper.toggled .list-group-item:hover,
+#wrapper.toggled .list-group-item.active {
+    background-color: #e9ecef !important;
+}
+
+#wrapper.toggled .list-group-item.active i {
+    color: #0d6efd !important; /* Highlight active icon */
+}

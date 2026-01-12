@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}Overall Exam Report{% endblock %}
+
+{% block page_heading %}
+    <i class="bi bi-clipboard-data text-primary me-2"></i>
+    Overall Exam Report for {{ examination_name }}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-primary text-white d-flex align-items-center">
+                    <i class="bi bi-bar-chart-fill me-2 fs-5"></i>
+                    <h5 class="card-title mb-0">Exam Attempt Summary by Class</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th><i class="bi bi-buildings me-1"></i> Class</th>
+                                    <th><i class="bi bi-people-fill me-1"></i> Total Students</th>
+                                    <th><i class="bi bi-check-circle-fill text-success me-1"></i> Attempted</th>
+                                    <th><i class="bi bi-x-circle-fill text-danger me-1"></i> Not Attempted</th>
+                                    <th><i class="bi bi-gear-fill me-1"></i> Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in report_data %}
+                                <tr>
+                                    <td>
+                                        <i class="bi bi-book-half text-primary me-1"></i>
+                                        {{ item.class_name }}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">
+                                            <i class="bi bi-people me-1"></i> {{ item.total_students }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle me-1"></i> {{ item.attempted_count }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if item.not_attempted_count > 0 %}
+                                            <span class="badge bg-danger">
+                                                <i class="bi bi-x-circle me-1"></i> {{ item.not_attempted_count }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-check2-all me-1"></i> 0
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if item.not_attempted_count > 0 %}
+                                            <a href="{% url 'reports:not_attempted_students' class_id=item.class_id examination_id=item.examination_id %}" 
+                                               class="btn btn-sm btn-outline-info d-flex align-items-center">
+                                                <i class="bi bi-eye-fill me-1"></i> View
+                                            </a>
+                                        {% else %}
+                                            <span class="text-success d-flex align-items-center">
+                                                <i class="bi bi-check-circle-fill me-1"></i> All Attempted
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-4">
+                                        <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                                        No data available for this examination.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

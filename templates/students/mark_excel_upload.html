@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Upload Marks - Sibwesa Primary School{% endblock %}
+{% block title %}Upload Marks - Kabage Primary School{% endblock %}
 
 {% block content %}
 <div class="container py-4"> {# Add a container for consistent spacing #}
@@ -97,7 +97,7 @@
             <p class="lead">Your Excel file (.xlsx format) should have the following exact column headers in the first row:</p>
             <ul class="list-group list-group-flush mb-4"> {# Styled list #}
                 <li class="list-group-item d-flex align-items-center">
-                    <span class="badge bg-primary rounded-pill me-2">1</span> <code>Admission_Number</code>
+                    <span class="badge bg-primary rounded-pill me-2">1</span> <code>Prem_Number</code>
                 </li>
                 <li class="list-group-item d-flex align-items-center">
                     <span class="badge bg-primary rounded-pill me-2">2</span> <code>First_Name</code>
@@ -117,15 +117,15 @@
             </ul>
             <p class="lead">Example:</p>
             <div class="bg-light p-3 border rounded-3 mb-4"> {# Styled code block #}
-                <pre class="mb-0"><code class="text-dark">Admission_Number,First_Name,Middle_Name,Last_Name,Subject_Code,Score
-SIBWESA/2025/001,John,K,Doe,MATH001,85
-SIBWESA/2025/002,Jane,,Smith,ENG001,72
-SIBWESA/2025/001,John,,Doe,ENG001,90
+                <pre class="mb-0"><code class="text-dark">Prem_Number,First_Name,Middle_Name,Last_Name,Subject_Code,Score
+KABAGE/25/001,John,K,Doe,MATH001,85
+KABAGE/2025/002,Jane,,Smith,ENG001,72
+KABAGE2025/001,John,,Doe,ENG001,90
 </code></pre>
             </div>
             <p class="text-muted small">
-                <i class="fas fa-info-circle me-1"></i> Rows with missing Admission Number or Subject Code will be skipped.<br>
-                <i class="fas fa-exclamation-circle me-1"></i> Invalid Admission Numbers or Subject Codes will result in errors.<br>
+                <i class="fas fa-info-circle me-1"></i> Rows with missing Prem Number or Subject Code will be skipped.<br>
+                <i class="fas fa-exclamation-circle me-1"></i> Invalid Prem Numbers or Subject Codes will result in errors.<br>
                 <i class="fas fa-exclamation-triangle me-1"></i> Scores outside the 0-100 range will be marked as errors.<br>
                 <i class="fas fa-sync-alt me-1"></i> Existing marks for the same student, subject, and examination will be updated.
             </p>

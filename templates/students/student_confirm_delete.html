@@ -10,7 +10,7 @@
                 <h5 class="mb-0">Confirm Delete</h5>
             </div>
             <div class="card-body">
-                <p>Are you sure you want to delete the student: <strong>{{ student.first_name }} {% if student.middle_name %}{{ student.middle_name }} {% endif %}{{ student.last_name }}</strong> (Admission No: {{ student.admission_number }})?</p>
+                <p>Are you sure you want to delete the student: <strong>{{ student.first_name }} {% if student.middle_name %}{{ student.middle_name }} {% endif %}{{ student.last_name }}</strong> (Prem No: {{ student.prem_number }})?</p>
                 <form method="post">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger me-2">Yes, Delete</button>

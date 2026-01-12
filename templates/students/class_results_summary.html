@@ -3,7 +3,7 @@
 {% extends 'base.html' %} 
 {# No widget_tweaks needed here as no form fields are rendered directly #}
 
-{% block title %}Class Results Summary - Sibwesa Primary School{% endblock %}
+{% block title %}Class Results Summary - Kabage Primary School{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4 print-area"> {# Consistent container for spacing #}
@@ -51,7 +51,7 @@
                     <thead class="bg-primary text-white"> {# Kept original primary background for table header #}
                         <tr>
                             <th class="text-center">Pos</th>
-                            <th class="text-center">Adm No.</th>
+                            <th class="text-center">Prem No.</th>
                             <th>Student Name</th>
                             {% for subject in all_subjects %}
                                 <th class="text-center">{{ subject.code }}</th>
@@ -68,7 +68,7 @@
                         {% for result in results %}
                         <tr>
                             <td class="text-center">{{ result.position|default:"-" }}</td>
-                            <td class="text-center">{{ result.student.admission_number }}</td>
+                            <td class="text-center">{{ result.student.prem_number }}</td>
                             <td class="student-name-cell">
                                 {{ result.student.first_name }}
                                 {% if result.student.middle_name %}

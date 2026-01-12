@@ -1,11 +1,11 @@
-{# templates/base.html #}
 {% load static %}
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Sibwesa Primary School{% endblock %}</title>
+    <title>{% block title %}Kabage Primary School{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -18,93 +18,106 @@
     {% block extra_head %}
     {% endblock %}
 </head>
-<body class="d-flex flex-column min-vh-100"> {# ADDED flex-column and min-vh-100 here #}
+<body class="d-flex flex-column min-vh-100">
     {# The main block for all page content - this is overridden by login/register pages #}
     {% block body_content %}
         {# Everything for the dashboard, including sidebar, top navbar, and content area #}
-        <div class="d-flex flex-grow-1" id="wrapper"> {# ADDED flex-grow-1 here #}
+        <div class="d-flex flex-grow-1" id="wrapper">
             {# Sidebar #}
             <div id="sidebar-wrapper">
                 <div class="sidebar-heading">
                     <img src="{% static 'users/img/shule.png' %}" alt="School Logo" class="sidebar-logo me-2">
-                    Sibwesa Primary School
+                    <span class="sidebar-text">Kabage Primary School</span>
                 </div>
-                <div class="list-group list-group-flush">
+
+                <div id="sidebar-scroll-area">
+                    <div class="list-group list-group-flush">
                     {# Dashboard Links (only visible if user is authenticated and has a role) #}
                     {% if user.is_authenticated %}
-                        {# Student Information #}
+
+                        {# 1. HOME/DASHBOARD LINK (Always visible and active) #}
+                        {% if user.role == 'admin' %}
+                            <a href="{% url 'admin_dashboard' %}" class="list-group-item list-group-item-action sidebar-link active"><i class="fas fa-home me-2"></i><span class="sidebar-text">Admin Dashboard</span></a>
+                        {% elif user.role|slice:":7" == 'teacher' %}
+                            <a href="{% url 'teacher_dashboard' %}" class="list-group-item list-group-item-action sidebar-link active"><i class="fas fa-home me-2"></i><span class="sidebar-text">Teacher Dashboard</span></a>
+                        {% elif user.role == 'student' %}
+                            <a href="{% url 'student_dashboard' %}" class="list-group-item list-group-item-action sidebar-link active"><i class="fas fa-home me-2"></i><span class="sidebar-text">Student Dashboard</span></a>
+                        {% endif %}
+
+                        {# 2. Student Information #}
                         <a href="#collapseStudentInfo" data-bs-toggle="collapse" aria-expanded="false" aria-controls="collapseStudentInfo"
-                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                            <div><i class="fas fa-users me-2"></i>Student Information</div>
-                            <i class="fas fa-chevron-down fa-xs ms-auto"></i>
+                        class="list-group-item list-group-item-action sidebar-link d-flex justify-content-between align-items-center">
+                            <div><i class="fas fa-users me-2"></i><span class="sidebar-text">Student Information</span></div>
+                            <i class="fas fa-chevron-down fa-xs ms-auto chevron-icon"></i>
                         </a>
-                        <div class="collapse" id="collapseStudentInfo" data-bs-parent="#sidebar-wrapper">
+                        <div class="collapse" id="collapseStudentInfo" data-bs-parent="#sidebar-scroll-area">
                             <div class="list-group list-group-flush ps-3">
                                 {% if request.user.is_authenticated and request.user.role == 'class_teacher' %}
-                                    {# LINK for Class Teacher's Own Class Students #}
-                                    <a href="{% url 'students_in_my_class' %}" class="list-group-item list-group-item-action">View Class Students</a>
-                                    {# LINK for All Students (Accessible by Class Teachers too) #}
-                                    <a href="{% url 'all_students' %}" class="list-group-item list-group-item-action">View All Students</a>
+                                <a href="{% url 'students_in_my_class' %}" class="list-group-item list-group-item-action">View Class Students</a>
+                                <a href="{% url 'all_students' %}" class="list-group-item list-group-item-action">View All Students</a>
                                 {% elif user.role == 'academic_teacher' or user.role == 'headteacher' or user.role == 'statistic_teacher' or user.role == 'subject_teacher' %}
-                                    {# ACADEMIC TEACHER only sees All Students #}
-                                    <a href="{% url 'all_students' %}" class="list-group-item list-group-item-action">View All Students</a>
-                                {# You might want to add similar logic for 'admin' role if they have distinct student views #}
+                                <a href="{% url 'all_students' %}" class="list-group-item list-group-item-action">View All Students</a>
                                 {% endif %}
                             </div>
                         </div>
 
-                        {# Mark Management #}
-                        <a href="#collapseMarkManagement" data-bs-toggle="collapse" aria-expanded="false" aria-controls="collapseMarkManagement"
-                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                            <div><i class="fas fa-edit me-2"></i>Mark Management</div>
-                            <i class="fas fa-chevron-down fa-xs ms-auto"></i>
+                        {# 3. Student Promotion & Graduation #}
+                        {% if user.role == 'headteacher' or user.role == 'admin' or user.role == 'statistic_teacher' %}
+                        <a href="{% url 'student_promotion_and_graduation' %}" class="list-group-item list-group-item-action sidebar-link d-flex justify-content-between align-items-center">
+                            <div><i class="fas fa-user-graduate me-2"></i><span class="sidebar-text">Promotion & Graduation</span></div>
                         </a>
-                        <div class="collapse" id="collapseMarkManagement" data-bs-parent="#sidebar-wrapper">
+                        {% endif %}
+
+                        {# 4. Mark Management #}
+                        <a href="#collapseMarkManagement" data-bs-toggle="collapse" aria-expanded="false" aria-controls="collapseMarkManagement"
+                        class="list-group-item list-group-item-action sidebar-link d-flex justify-content-between align-items-center">
+                            <div><i class="fas fa-edit me-2"></i><span class="sidebar-text">Mark Management</span></div>
+                            <i class="fas fa-chevron-down fa-xs ms-auto chevron-icon"></i>
+                        </a>
+                        <div class="collapse" id="collapseMarkManagement" data-bs-parent="#sidebar-scroll-area">
                             <div class="list-group list-group-flush ps-3">
                                 {% if user.role == 'class_teacher' %}
-                                    <a href="{% url 'mark_entry_selection' %}" class="list-group-item list-group-item-action">Enter Class Marks</a>
-                                    <a href="{% url 'mark_list' %}" class="list-group-item list-group-item-action">View Class Marks</a>
+                                <a href="{% url 'mark_entry_selection' %}" class="list-group-item list-group-item-action">Enter Class Marks</a>
+                                <a href="{% url 'mark_list' %}" class="list-group-item list-group-item-action">View Class Marks</a>
                                 {% elif user.role == 'statistic_teacher' or user.role == 'subject_teacher' %}
-                                    <a href="{% url 'mark_entry_selection' %}" class="list-group-item list-group-item-action">Enter Marks</a>
-                                    <a href="{% url 'mark_list' %}" class="list-group-item list-group-item-action">View Marks</a>
+                                <a href="{% url 'mark_entry_selection' %}" class="list-group-item list-group-item-action">Enter Marks</a>
+                                <a href="{% url 'mark_list' %}" class="list-group-item list-group-item-action">View Marks</a>
                                 {% elif user.role == 'headteacher' or user.role == 'academic_teacher' %}
-                                    <a href="{% url 'mark_list' %}" class="list-group-item list-group-item-action">View All Marks</a>
-                                    <a href="{% url 'mark_entry_selection' %}" class="list-group-item list-group-item-action">Enter/Edit Marks</a>
+                                <a href="{% url 'mark_list' %}" class="list-group-item list-group-item-action">View All Marks</a>
+                                <a href="{% url 'mark_entry_selection' %}" class="list-group-item list-group-item-action">Enter/Edit Marks</a>
                                 {% endif %}
                             </div>
                         </div>
 
-                        {# Performance & Results #}
+                        {# 5. Performance & Results #}
                         <a href="#collapsePerformance" data-bs-toggle="collapse" aria-expanded="false" aria-controls="collapsePerformance"
-                        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                            <div><i class="fas fa-chart-line me-2"></i>Performance & Results</div>
-                            <i class="fas fa-chevron-down fa-xs ms-auto"></i>
+                        class="list-group-item list-group-item-action sidebar-link d-flex justify-content-between align-items-center">
+                            <div><i class="fas fa-chart-line me-2"></i><span class="sidebar-text">Performance & Results</span></div>
+                            <i class="fas fa-chevron-down fa-xs ms-auto chevron-icon"></i>
                         </a>
-                        <div class="collapse" id="collapsePerformance" data-bs-parent="#sidebar-wrapper">
+                        <div class="collapse" id="collapsePerformance" data-bs-parent="#sidebar-scroll-area">
                             <div class="list-group list-group-flush ps-3">
                                 <a href="{% url 'result_selection' %}" class="list-group-item list-group-item-action">Generate Results</a>
                                 <a href="{% url 'performance_selection' %}" class="list-group-item list-group-item-action">View Performance</a>
-
-                                {# LINK FOR OVERALL SCHOOL PERFORMANCE (Keep this as is) #}
+                                
                                 {% if user.role == 'admin' or user.role == 'headteacher' or user.role == 'statistic_teacher' or user.role == 'academic_teacher' %}
-                                    <a href="{% url 'overall_school_performance' %}" class="list-group-item list-group-item-action">Overall School Performance</a>
+                                <a href="{% url 'overall_school_performance' %}" class="list-group-item list-group-item-action">Overall School Performance</a>
                                 {% endif %}
 
-                                {# CORRECTED LINK FOR EXAMINATION ANALYSIS #}
                                 {% if user.role == 'academic_teacher' or user.role == 'statistic_teacher' or user.role == 'headteacher' %}
-                                    <a href="{% url 'performance_analysis' %}" class="list-group-item list-group-item-action">Examination Analysis</a>
+                                <a href="{% url 'performance_analysis' %}" class="list-group-item list-group-item-action">Examination Analysis</a>
                                 {% endif %}
                             </div>
                         </div>
 
-                        {# NEW SECTION: Teacher Management #}
+                        {# 6. Teacher Management #}
                         {% if user.role == 'headteacher' or user.role == 'admin' %}
                         <a href="#collapseTeacherManagement" data-bs-toggle="collapse" aria-expanded="false" aria-controls="collapseTeacherManagement"
-                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                            <div><i class="fas fa-chalkboard-teacher me-2"></i>Teacher Management</div>
-                            <i class="fas fa-chevron-down fa-xs ms-auto"></i>
+                        class="list-group-item list-group-item-action sidebar-link d-flex justify-content-between align-items-center">
+                            <div><i class="fas fa-chalkboard-teacher me-2"></i><span class="sidebar-text">Teacher Management</span></div>
+                            <i class="fas fa-chevron-down fa-xs ms-auto chevron-icon"></i>
                         </a>
-                        <div class="collapse" id="collapseTeacherManagement" data-bs-parent="#sidebar-wrapper">
+                        <div class="collapse" id="collapseTeacherManagement" data-bs-parent="#sidebar-scroll-area">
                             <div class="list-group list-group-flush ps-3">
                                 <a href="{% url 'all_teachers' %}" class="list-group-item list-group-item-action">View All Teachers</a>
                                 <a href="{% url 'add_teacher' %}" class="list-group-item list-group-item-action">Add/Manage Teachers</a>
@@ -112,105 +125,191 @@
                         </div>
                         {% endif %}
 
-                        {# Timetable & Attendance #}
+                        {# 7. Reporting Section with collapsible submenu #}
+                        {% if user.role in 'headteacher admin statistic_teacher academic_teacher class_teacher' %}
+                            <a href="#collapseReporting" data-bs-toggle="collapse" aria-expanded="false" aria-controls="collapseReporting"
+                                class="list-group-item list-group-item-action sidebar-link d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-file-alt me-2"></i><span class="sidebar-text">Reporting</span></div>
+                                <i class="fas fa-chevron-down fa-xs ms-auto chevron-icon"></i>
+                            </a>
+                            <div class="collapse" id="collapseReporting" data-bs-parent="#sidebar-scroll-area">
+                                <div class="list-group list-group-flush ps-3">
+                                    <a href="{% url 'reports:graduated_students' %}" class="list-group-item list-group-item-action">Graduated Students</a>
+
+                                    {# Conditional links based on user role #}
+                                    {% if user.is_authenticated and user.role == 'class_teacher' and user.teacher_profile.class_taught %}
+                                        <a href="{% url 'reports:not_attempted_students' class_id=user.teacher_profile.class_taught.pk %}" class="list-group-item list-group-item-action">My Class: Not Attempted Exam</a>
+                                        <a href="{% url 'reports:top_bottom_students' class_id=user.teacher_profile.class_taught.pk %}" class="list-group-item list-group-item-action">My Class: Top and Bottom</a>
+                                    {% elif user.is_authenticated and user.role in 'headteacher admin statistic_teacher academic_teacher' %}
+                                        <a href="{% url 'reports:select_exam_for_not_attempted' %}" class="list-group-item list-group-item-action">All Classes: Not Attempted Exam</a>
+                                        <a href="{% url 'reports:select_exam_for_top_bottom' %}" class="list-group-item list-group-item-action">All Classes: Top and Bottom</a>
+                                        <a href="{% url 'reports:select_comparison_exam' %}" class="list-group-item list-group-item-action">Class Comparison</a>
+                                        <a href="#" class="list-group-item list-group-item-action disabled">Student Trend (on Student Profile)</a>
+                                        {% else %}
+                                        <a href="#" class="list-group-item list-group-item-action disabled">My Class: Not Attempted Exam</a>
+                                        <a href="#" class="list-group-item list-group-item-action disabled">My Class: Top and Bottom</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {# 8. Timetable & Attendance #}
                         <a href="#collapseTimetableAttendance" data-bs-toggle="collapse" aria-expanded="false" aria-controls="collapseTimetableAttendance"
-                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                            <div><i class="fas fa-calendar-check me-2"></i>Timetable & Attendance</div>
-                            <i class="fas fa-chevron-down fa-xs ms-auto"></i>
+                        class="list-group-item list-group-item-action sidebar-link d-flex justify-content-between align-items-center">
+                            <div><i class="fas fa-calendar-check me-2"></i><span class="sidebar-text">Timetable & Attendance</span></div>
+                            <i class="fas fa-chevron-down fa-xs ms-auto chevron-icon"></i>
                         </a>
-                        <div class="collapse" id="collapseTimetableAttendance" data-bs-parent="#sidebar-wrapper">
+                        <div class="collapse" id="collapseTimetableAttendance" data-bs-parent="#sidebar-scroll-area">
                             <div class="list-group list-group-flush ps-3">
                                 <a href="{% url 'attendance_view' %}" class="list-group-item list-group-item-action">Mark Attendance</a>
                                 <a href="{% url 'timetable_view' %}" class="list-group-item list-group-item-action">View Timetable</a>
                             </div>
                         </div>
                     {% endif %} {# End of authenticated user sidebar links #}
+                    </div>
                 </div>
             </div>
 
             {# Page Content Wrapper (main content area for the entire site) #}
-            <div id="page-content-wrapper" class="flex-grow-1 d-flex flex-column"> {# Added flex-grow-1, d-flex flex-column #}
+            <div id="page-content-wrapper" class="flex-grow-1 d-flex flex-column">
                 {# Top Navbar (Dashboard Specific) #}
                 <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
                     <button class="btn btn-primary" id="menu-toggle">
                         <i class="fas fa-bars"></i>
                     </button>
-                    <h4 class="ms-3 my-0">{% block page_heading %}Welcome!{% endblock %}</h4> {# Dynamic page title #}
-                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                        <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
-                            {% if user.is_authenticated %}
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownDashboard" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        {# User Icon & Name #}
-                                        {# --- START MODIFIED SECTION FOR ROLE DISPLAY --- #}
-                                        {% if user.gender == 'M' %}
-                                            <img src="{% static 'users/img/male_icon.png' %}" alt="Male User Icon" class="rounded-circle me-1" style="width: 30px; height: 30px; object-fit: cover;">
-                                        {% elif user.gender == 'F' %}
-                                            <img src="{% static 'users/img/female_icon.png' %}" alt="Female User Icon" class="rounded-circle me-1" style="width: 30px; height: 30px; object-fit: cover;">
+                    <h4 class="ms-3 my-0">{% block page_heading %}Welcome!{% endblock %}</h4>
+
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    {% get_current_language as LANGUAGE_CODE %}
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    
+                    {# Language Switcher #}
+                    <ul class="navbar-nav me-auto mt-2 mt-lg-0">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownLanguage" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-globe me-1"></i>
+                                {% if LANGUAGE_CODE == 'en' %}{% translate "Language" %} (English){% else %}{% translate "Language" %} (Kiswahili){% endif %}
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdownLanguage">
+                                {% get_language_info for 'en' as lang_en %}
+                                {% get_language_info for 'sw' as lang_sw %}
+                                
+                                {% if LANGUAGE_CODE != 'en' %}
+                                    <li>
+                                        <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
+                                            <input name="next" type="hidden" value="{{ request.path }}">
+                                            <input name="language" type="hidden" value="en">
+                                            <button type="submit" class="dropdown-item">
+                                                English
+                                            </button>
+                                        </form>
+                                    </li>
+                                {% endif %}
+                                
+                                {% if LANGUAGE_CODE != 'sw' %}
+                                    <li>
+                                        <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
+                                            <input name="next" type="hidden" value="{{ request.path }}">
+                                            <input name="language" type="hidden" value="sw">
+                                            <button type="submit" class="dropdown-item">
+                                                Kiswahili
+                                            </button>
+                                        </form>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </li>
+                    </ul>
+
+                    {# User Profile Dropdown (Pushed to the far right) #}
+                    <ul class="navbar-nav mt-2 mt-lg-0">
+                        {% if user.is_authenticated %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdownDashboard" role="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
+                                    {# User Icon & Name #}
+                                    {% if user.gender == 'M' %}
+                                        <img src="{% static 'users/img/male_icon.png' %}" alt="Male User Icon" class="rounded-circle me-1" style="width: 30px; height: 30px; object-fit: cover;">
+                                    {% elif user.gender == 'F' %}
+                                        <img src="{% static 'users/img/female_icon.png' %}" alt="Female User Icon" class="rounded-circle me-1" style="width: 30px; height: 30px; object-fit: cover;">
+                                    {% else %}
+                                        <i class="fas fa-user me-1"></i>
+                                    {% endif %}
+                                    <span>
+                                        {% if user.first_name and user.last_name %}
+                                            {{ user.first_name }} {{ user.last_name }}
                                         {% else %}
-                                            <i class="fas fa-user me-1"></i>
+                                            {{ user.username }}
                                         {% endif %}
-                                        <span> {# Use a span to wrap name and role for better control #}
-                                            {% if user.first_name and user.last_name %}
-                                                {{ user.first_name }} {{ user.last_name }}
-                                            {% else %}
-                                                {{ user.username }}
-                                            {% endif %}
-                                            {% if user.role %}
-                                                <br><small>{{ user.get_role_display }}</small> {# Display the role #}
-                                            {% endif %}
-                                        </span>
-                                        {# --- END MODIFIED SECTION FOR ROLE DISPLAY --- #}
+                                        {% if user.role %}
+                                            <br><small>{{ user.get_role_display }}</small>
+                                        {% endif %}
+                                    </span>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownDashboard">
+                                    {% if user.role == 'admin' %}
+                                        <a class="dropdown-item text-success fw-semibold" href="{% url 'admin_dashboard' %}">
+                                            <i class="bi bi-speedometer2 me-2"></i> {% translate "Admin Dashboard" %}
+                                        </a>
+                                    {% elif user.role == 'academic_teacher' or user.role == 'class_teacher' or user.role == 'headteacher' or user.role == 'statistic_teacher' or user.role == 'subject_teacher' %}
+                                        <a class="dropdown-item text-success fw-semibold" href="{% url 'teacher_dashboard' %}">
+                                            <i class="bi bi-speedometer2 me-2"></i> {% translate "Teacher Dashboard" %}
+                                        </a>
+                                    {% elif user.role == 'student' %}
+                                        <a class="dropdown-item" href="{% url 'student_dashboard' %}">{% translate "Student Dashboard" %}</a>
+                                    {% endif %}
+                                    <a class="dropdown-item" href="{% url 'profile' %}">
+                                        <i class="bi bi-person-circle me-2"></i> {% translate "Profile" %}
                                     </a>
-                                    <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownDashboard">
-                                        {% if user.role == 'admin' %}
-                                            <a class="dropdown-item text-success fw-semibold" href="{% url 'admin_dashboard' %}">
-                                                <i class="bi bi-speedometer2 me-2"></i> Admin Dashboard</a>
-                                        {% elif user.role == 'academic_teacher' or user.role == 'class_teacher' or user.role == 'headteacher' or user.role == 'statistic_teacher' or user.role == 'subject_teacher' %}
-                                            <a class="dropdown-item text-success fw-semibold" href="{% url 'teacher_dashboard' %}">
-                                                <i class="bi bi-speedometer2 me-2"></i> Teacher Dashboard
-                                            </a>
-                                        {% elif user.role == 'student' %}
-                                            <a class="dropdown-item" href="{% url 'student_dashboard' %}">Student Dashboard</a>
-                                        {% endif %}
-                                        <a class="dropdown-item" href="{% url 'profile' %}">
-                                            <i class="bi bi-person-circle me-2"></i> Profile
-                                        </a>
-                                        <a class="dropdown-item text-danger fw-semibold" href="{% url 'logout' %}">
-                                            <i class="bi bi-box-arrow-right me-2"></i> Logout
-                                        </a>
-                                    </div>
-                                </li>
-                            {% else %}
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{% url 'login' %}">Login</a>
-                                </li>
-                            {% endif %}
-                        </ul>
-                    </div>
+                                    <a class="dropdown-item text-danger fw-semibold" href="{% url 'logout' %}">
+                                        <i class="bi bi-box-arrow-right me-2"></i> {% translate "Logout" %}
+                                    </a>
+                                </div>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'login' %}">{% translate "Login" %}</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
                 </nav>
 
-                <div id="main-content-area" class="flex-grow-1 overflow-auto"> {# Added flex-grow-1 and overflow-auto #}
+                {# Main Content Area - This is where the page-specific content will be rendered #}
+                <div id="main-content-area" class="flex-grow-1 overflow-auto">
                     {% block content %}{% endblock %} {# This is the main content block for dashboard pages #}
                 </div>
             </div>
         </div>
     {% endblock body_content %}
 
-    {# Site-wide Footer - MOVED OUTSIDE body_content to be a direct child of body #}
+    {# Site-wide Footer #}
     <footer id="main-site-footer" class="text-dark text-center py-3">
         <div class="container-fluid">
-            <p class="mb-0">&copy; Copyright Sibwesa Primary School {% now "Y" %}. All rights reserved.</p>
+            <p class="mb-0">&copy; Copyright Kabage Primary School {% now "Y" %}. All rights reserved.</p>
         </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script>
-        // Sidebar Toggle JavaScript - only needed for dashboard pages
+        // Sidebar Toggle JavaScript
         if (document.getElementById("menu-toggle")) {
             document.getElementById("menu-toggle").addEventListener("click", function() {
                 document.getElementById("wrapper").classList.toggle("toggled");
+                // Optional: Update the toggle button icon on state change
+                let icon = this.querySelector('i');
+                if (document.getElementById("wrapper").classList.contains("toggled")) {
+                    icon.classList.remove('fa-bars');
+                    icon.classList.add('fa-times'); // Use a close icon when collapsed
+                } else {
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
             });
         }
     </script>

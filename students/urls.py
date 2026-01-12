@@ -56,6 +56,9 @@ urlpatterns = [
 
     path('class-summary-pdf/<int:exam_id>/<int:class_id>/', views.download_class_summary_pdf, name='class_summary_pdf'),
     path('student-result-pdf/<int:exam_id>/<int:student_id>/',views.download_student_result_pdf,name='student_result_pdf'),
+    path('class_analysis_pdf/<int:exam_id>/<int:class_id>/', views.class_analysis_pdf, name='class_analysis_pdf'),
+
+    path('student_promotion_graduation/', views.student_promotion_and_graduation, name='student_promotion_and_graduation'),
 
     path('upload-excel/', views.upload_students_excel, name='upload_students_excel'),
 ]

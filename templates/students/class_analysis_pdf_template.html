@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 8pt;
+            margin-top: 0;
+            margin-bottom: 0;
+            padding-bottom: 1cm;
+            color: #333;
+        }
+        h2, h3 {
+            text-align: center;
+            font-weight: 700;
+            color: #004080;
+            margin-bottom: 0.1em;
+        }
+        p {
+            text-align: center;
+            font-size: 8pt;
+            margin-top: 0;
+            margin-bottom: 0.5em;
+        }
+        p .year {
+            font-style: italic;
+            color: #666;
+            margin-left: 0.3em;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8pt;
+            margin-bottom: 25px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 4px 6px;
+            text-align: center;
+        }
+        thead th {
+            background-color: #004080;
+            color: white;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .two-column {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .two-column > div {
+            flex: 1;
+        }
+        @page {
+            margin: 20mm 20mm 30mm 20mm;
+            @bottom-center {
+                content: "Kabage Primary School | © {% now 'Y' %} | Page " counter(page) " of " counter(pages);
+                font-size: 10px;
+                color: #555;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h2>KABAGE PRIMARY SCHOOL</h2>
+    <h2>Class Performance Analysis</h2>
+    <p>
+      <strong>Examination:</strong> {{ examination.name }} ({{ examination.term }})
+      <span class="year">{{ examination.academic_year }}</span>
+    </p>
+    <p><strong>Class:</strong> {{ class_obj.name }} ({{ class_obj.year }})</p>
+
+    <h3>Overall Grade Distribution</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Grade</th>
+                <th>Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for grade, count in overall_grade_distribution.items %}
+            <tr>
+                <td>{{ grade }}</td>
+                <td>{{ count }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Pass/Fail Summary</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Summary</th>
+                <th>Count</th>
+                <th>Rate</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Pass (A-C)</td>
+                <td>{{ overall_pass_count }}</td>
+                <td>{{ overall_pass_rate }}%</td>
+            </tr>
+            <tr>
+                <td>Fail (D-F)</td>
+                <td>{{ overall_fail_count }}</td>
+                <td>{{ overall_fail_rate }}%</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Subject-wise Performance</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Students</th>
+                <th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th>
+                <th>Pass</th><th>Fail</th>
+                <th>Pass %</th><th>Fail %</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for subj in subject_performance %}
+            <tr>
+                <td>{{ subj.name }}</td>
+                <td>{{ subj.total_scored }}</td>
+                <td>{{ subj.grades.A }}</td><td>{{ subj.grades.B }}</td><td>{{ subj.grades.C }}</td>
+                <td>{{ subj.grades.D }}</td><td>{{ subj.grades.E }}</td><td>{{ subj.grades.F }}</td>
+                <td>{{ subj.pass_count }}</td><td>{{ subj.fail_count }}</td>
+                <td>{{ subj.pass_percentage|floatformat:2 }}%</td><td>{{ subj.fail_percentage|floatformat:2 }}%</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Side-by-side Top 10 and Last 10 -->
+    <div class="two-column">
+        <div>
+            <h3>Top 10 Students</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pos</th>
+                        <th>Name</th>
+                        <th>Average</th>
+                        <th>Grade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if top_students %}
+                        {% for student in top_students %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td style="text-align: left;">{{ student.name }}</td>
+                            <td style="text-align: right;">{{ student.average }}</td>
+                            <td>{{ student.grade }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4">No data available</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+        <div>
+            <h3>Last 10 Students</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pos</th>
+                        <th>Name</th>
+                        <th>Average</th>
+                        <th>Grade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if bottom_students %}
+                        {% for student in bottom_students %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td style="text-align: left;">{{ student.name }}</td>
+                            <td style="text-align: right;">{{ student.average }}</td>
+                            <td>{{ student.grade }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4">No data available</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

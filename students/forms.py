@@ -17,7 +17,7 @@ class StudentForm(forms.ModelForm):
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
             'date_of_birth': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}), # Added type='date' for browser date picker
             'gender': forms.Select(attrs={'class': 'form-select'}), # Use form-select for select inputs
-            'admission_number': forms.TextInput(attrs={'class': 'form-control'}),
+            'prem_number': forms.TextInput(attrs={'class': 'form-control'}),
             'current_class': forms.Select(attrs={'class': 'form-select'}),
             'status': forms.Select(attrs={'class': 'form-select'}),
         }
@@ -76,7 +76,7 @@ class MarkEntrySelectionForm(forms.Form):
 class MarkExcelUploadForm(forms.Form):
     excel_file = forms.FileField(
         label="Select Excel File (.xlsx)",
-        help_text="Upload an Excel file with columns: Admission_Number, Subject_Code, Score"
+        help_text="Upload an Excel file with columns: prem_Number, Subject_Code, Score"
     )
 
 class MarkEntrySelectionForm(forms.Form):
@@ -116,7 +116,7 @@ class ResultSelectionForm(forms.Form):
 class StudentCreationForm(forms.ModelForm):
     class Meta:
         model = Student
-        fields = ['first_name', 'middle_name', 'last_name', 'date_of_birth', 'gender', 'admission_number', 'current_class']
+        fields = ['first_name', 'middle_name', 'last_name', 'date_of_birth', 'gender', 'prem_number', 'current_class']
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None) # Pop the user

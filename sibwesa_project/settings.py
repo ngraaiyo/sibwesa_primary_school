@@ -1,10 +1,19 @@
-
 from pathlib import Path
 import os
+import gettext # Import the gettext module here
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-lb^*6g3rd_@3#dcjpq!r8po0qd_(%8dkj(ke=uug2&oau_0r!b'
+# FIX FOR UNICODEDECODEERROR ON WINDOWS
+# This forces gettext to read MO files using UTF-8 encoding.
+try:
+    gettext.bind_textdomain_codes = lambda domain, codes=None: None
+except AttributeError:
+    pass
+# ----------------------------------------
+
+# MANDATORY: This key MUST be present for Django to start.
+SECRET_KEY = 'a-random-placeholder-key-for-development' 
 
 DEBUG = True
 
@@ -19,15 +28,18 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'users',
     'students',
+    'reports',
     'performance',
     'widget_tweaks',
     'crispy_forms',
     'crispy_bootstrap5',
+
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -60,7 +72,6 @@ STATICFILES_DIRS = [
 
 WSGI_APPLICATION = 'sibwesa_project.wsgi.application'
 
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -83,25 +94,31 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en-us' 
 
 TIME_ZONE = 'UTC'
 
-USE_I18N = True
+USE_I18N = True 
+USE_L10N = True 
+
+LANGUAGES = [
+    ('en', ('English')),
+    ('sw', ('Swahili')),
+]
+
+LANGUAGE_CODE = 'en'
+
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
 
 USE_TZ = True
-
-STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'users.CustomUser'
 
 LOGIN_URL = '/users/login/' 
-
-AFRICASTALKING_USERNAME = 'ngraaiyo'
-AFRICASTALKING_API_KEY = 'atsk_16077aa3283223afe2c3b7270225c5bc7a7e6df5bdddc2f7e2ec275d66eae2e0f97beff7'  
-AFRICASTALKING_SENDER_ID = '9330'
 
 # Email Settings
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
